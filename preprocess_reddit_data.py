@@ -6,7 +6,7 @@ import json
 
 all_data = []
 for subreddit in subreddits:
-    df = pd.read_csv(f"reddit_scrape/{subreddit}.csv", sep='\t')
+    df = pd.read_csv(f"data/reddit_scrape/{subreddit}.csv", sep='\t')
     post_titles = list(df["title"])
     print(f"{subreddit} has {len(post_titles)} posts")
     all_data.extend(post_titles)
@@ -17,7 +17,7 @@ print(f"In total there are {len(all_data)} posts")
 
 ### Read condescending data from TalkDown
 condescending_set = []
-with open("talkdown/data/balanced_train.jsonl") as f:
+with open("data/talkdown/data/balanced_train.jsonl") as f:
     json_list = list(f)
 for json_str in json_list:
     data = json.loads(json_str)
@@ -79,3 +79,4 @@ for sentence in all_data:
 
 print(f"After filtering there are {len(filtered_data)} posts")
 # After filtering there are 202690 posts
+# After filtering there are 208000 posts

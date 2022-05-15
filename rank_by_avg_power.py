@@ -4,7 +4,7 @@ import pandas as pd
 
 ### Get power scores
 power_scores = {}
-with open('NRC-VAD-Lexicon-Aug2018Release/OneFilePerDimension/d-scores.txt') as f:
+with open('lexicons/NRC-VAD-Lexicon-Aug2018Release/OneFilePerDimension/d-scores.txt') as f:
     lines = f.readlines()
     for line in lines:
         line = line.strip()
@@ -33,7 +33,7 @@ def get_sentences_with_power_scores(sentences):
     
 
 ### Read clean data
-clean_set = pd.read_pickle(r'veiled-toxicity-detection/resources/processed_dataset/clean_train.pkl')
+clean_set = pd.read_pickle('data/veiled-toxicity-detection/resources/processed_dataset/clean_train.pkl')
 # This is a list of tuples where the second element is always None, so 
 # just flattening it to a list of the strings
 clean_set = [sentence for sentence, _ in clean_set]
@@ -45,7 +45,7 @@ clean_sorted_by_power = sorted(clean_sentences_with_power, key=lambda x: x['powe
 
 ### Read condescending data from TalkDown
 condescending_set = []
-with open("talkdown/data/balanced_train.jsonl") as f:
+with open("data/talkdown/data/balanced_train.jsonl") as f:
     json_list = list(f)
 for json_str in json_list:
     data = json.loads(json_str)

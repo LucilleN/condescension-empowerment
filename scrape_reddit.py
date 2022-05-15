@@ -8,9 +8,9 @@ api = PushshiftAPI()
 limit = 10000
 
 subreddits = [
-    # "DecidingToBeBetter",
-    # "productivity",
-    # "selfimprovement",
+    "DecidingToBeBetter",
+    "productivity",
+    "selfimprovement",
     "GetMotivated",
     "LifeProTips",
     "ted",
@@ -52,14 +52,7 @@ if __name__ == "__main__":
                 data_to_keep = submissions[['title', 'score']]
                 print(f"data_to_keep shape: {data_to_keep.shape}")
 
-                data_to_keep.to_csv(f"reddit_scrape/{subreddit}.csv", mode='a', sep="\t", index=False)
-
-
-    ##################
-    # print(DecidingToBeBetter_submissions['title'].sample(10))
-
-    # all_dates = pd.date_range('2019-05-25', '2020-06-27', freq='D')
-    # print(all_dates)
+                data_to_keep.to_csv(f"data/reddit_scrape/{subreddit}.csv", mode='a', sep="\t", index=False)
 
 
 

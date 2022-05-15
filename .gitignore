@@ -131,4 +131,9 @@ dmypy.json
 # Ignore data folders
 /data
 /lexicons
+
+# Ignore outputs I'm saving just for reference
 /outputs
+
+# Miscellaneous 
+.DS_Store
