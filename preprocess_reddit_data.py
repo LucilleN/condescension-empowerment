@@ -1,7 +1,7 @@
 from scrape_reddit import subreddits
 import pandas as pd
 import statistics
-import json
+from utils import read_talkdown
 
 
 all_data = []
@@ -16,14 +16,7 @@ print(f"In total there are {len(all_data)} posts")
 
 
 ### Read condescending data from TalkDown
-condescending_set = []
-with open("data/talkdown/data/balanced_train.jsonl") as f:
-    json_list = list(f)
-for json_str in json_list:
-    data = json.loads(json_str)
-    if data['label']: # if it's labeled as True for condescending
-        condescending_set.append(data['quotedpost'])
-        # condescending_set.append(data['post'])
+condescending_set = read_talkdown()
 sentence_lengths = [len(sentence) for sentence in condescending_set]
 mean_length = statistics.mean(sentence_lengths)
 sd_length = statistics.stdev(sentence_lengths)

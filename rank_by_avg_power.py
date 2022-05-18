@@ -1,6 +1,6 @@
 import json
 import pandas as pd
-
+from utils import read_talkdown
 
 ### Get power scores
 power_scores = {}
@@ -44,14 +44,7 @@ clean_sorted_by_power = sorted(clean_sentences_with_power, key=lambda x: x['powe
 
 
 ### Read condescending data from TalkDown
-condescending_set = []
-with open("data/talkdown/data/balanced_train.jsonl") as f:
-    json_list = list(f)
-for json_str in json_list:
-    data = json.loads(json_str)
-    if data['label']: # if it's labeled as True for condescending
-        # condescending_set.append(data['quotedpost'])
-        condescending_set.append(data['post'])
+condescending_set = read_talkdown()
 
 condescending_sentences_with_power = get_sentences_with_power_scores(condescending_set)
 condescending_sorted_by_power = sorted(condescending_sentences_with_power, key=lambda x: x['power'], reverse=True) 
