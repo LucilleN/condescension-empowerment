@@ -1,8 +1,6 @@
 import json
-from utils import read_talkdown, read_power_scores, read_veiled_toxicity_clean
+from utils import read_talkdown, read_VAD_scores, read_veiled_toxicity_clean
 
-### Get power scores
-power_scores = read_power_scores()
 
 def get_sentences_with_power_scores(sentences):
     sentences_with_power = []
@@ -24,12 +22,8 @@ def get_sentences_with_power_scores(sentences):
     return sentences_with_power
     
 
-### Read clean data
-clean_set = read_veiled_toxicity_clean()
-clean_sentences_with_power = get_sentences_with_power_scores(clean_set)
-clean_sorted_by_power = sorted(clean_sentences_with_power, key=lambda x: x['power'], reverse=True) 
-# for x in clean_sorted_by_power:
-#     print(x)
+### Get power scores
+power_scores = read_VAD_scores("d") # d for dominance
 
 
 ### Read condescending data from TalkDown
@@ -41,12 +35,16 @@ condescending_sorted_by_power = sorted(condescending_sentences_with_power, key=l
 #     print(x)
 
 
+### Read clean data from Han's paper -- subset of SBIC that is unambiguously non-toxic
+clean_set = read_veiled_toxicity_clean()
+clean_sentences_with_power = get_sentences_with_power_scores(clean_set)
+clean_sorted_by_power = sorted(clean_sentences_with_power, key=lambda x: x['power'], reverse=True) 
+
 ### Trim the longer dataset and find the average of power scores across all of them
 clean_sorted_by_power_trimmed = clean_sorted_by_power[:len(condescending_sorted_by_power)]
 for x in clean_sorted_by_power_trimmed:
     print(x)
-# for x in clean_sorted_by_power:
-#     print(x)
+
 
 print(f"number of clean (trimmed): {len(clean_sorted_by_power_trimmed)}")
 print(f"number of condescending: {len(condescending_sorted_by_power)}")

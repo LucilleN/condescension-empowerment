@@ -30,14 +30,18 @@ def read_veiled_toxicity_clean():
     clean_set = [sentence for sentence, _ in clean_set]
     return clean_set
 
-def read_power_scores():
+def read_VAD_scores(dimension_to_load):
     """
     Reads dominance (aka power) from the VAD lexicon. 
+    Args:
+        dimension_to_load: a string with just 3 options to specify which dimension to load: 
+                           "v" (valence / sentiment), "a" (arousal / agency), "d" (dominance / power)
     Returns:
         A dictionary, where keys (str) are the words in the lexicon and values (float) are their power score
     """
+    assert dimension_to_load == "v" or dimension_to_load == "a" or dimension_to_load == "d"
     power_scores = {}
-    with open('lexicons/NRC-VAD-Lexicon-Aug2018Release/OneFilePerDimension/d-scores.txt') as f:
+    with open(f'lexicons/NRC-VAD-Lexicon-Aug2018Release/OneFilePerDimension/{dimension_to_load}-scores.txt') as f:
         lines = f.readlines()
         for line in lines:
             line = line.strip()
