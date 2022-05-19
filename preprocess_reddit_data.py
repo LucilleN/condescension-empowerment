@@ -71,5 +71,7 @@ for sentence in all_data:
     filtered_data.append(sentence)
 
 print(f"After filtering there are {len(filtered_data)} posts")
-# After filtering there are 202690 posts
 # After filtering there are 208000 posts
+
+df = pd.DataFrame(filtered_data)
+df.to_csv("data/reddit_scrape_filtered.csv", sep="\t", index=False, header=False)

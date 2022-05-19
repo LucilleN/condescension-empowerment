@@ -1,16 +1,8 @@
 import json
-import pandas as pd
-from utils import read_talkdown
+from utils import read_talkdown, read_power_scores, read_veiled_toxicity_clean
 
 ### Get power scores
-power_scores = {}
-with open('lexicons/NRC-VAD-Lexicon-Aug2018Release/OneFilePerDimension/d-scores.txt') as f:
-    lines = f.readlines()
-    for line in lines:
-        line = line.strip()
-        word, score = line.split("\t")
-        power_scores[word] = float(score)
-        # print(f"power_scores[{word}] = {float(score)}")
+power_scores = read_power_scores()
 
 def get_sentences_with_power_scores(sentences):
     sentences_with_power = []
@@ -33,10 +25,7 @@ def get_sentences_with_power_scores(sentences):
     
 
 ### Read clean data
-clean_set = pd.read_pickle('data/veiled-toxicity-detection/resources/processed_dataset/clean_train.pkl')
-# This is a list of tuples where the second element is always None, so 
-# just flattening it to a list of the strings
-clean_set = [sentence for sentence, _ in clean_set]
+clean_set = read_veiled_toxicity_clean()
 clean_sentences_with_power = get_sentences_with_power_scores(clean_set)
 clean_sorted_by_power = sorted(clean_sentences_with_power, key=lambda x: x['power'], reverse=True) 
 # for x in clean_sorted_by_power:
@@ -76,5 +65,3 @@ print(f'clean range (trimmed): [{clean_max_trimmed}, {clean_min_trimmed}]')
 condescending_avg_power = sum([x['power'] for x in condescending_sorted_by_power]) / len(condescending_sorted_by_power)
 print(f"condescending average power: {condescending_avg_power}")
 print(f"condescending range: [{condescending_sorted_by_power[0]['power']}, {condescending_sorted_by_power[-1]['power']}]")
-
-
