@@ -18,6 +18,18 @@ def read_talkdown():
             # condescending_set.append(data['post']) # This is the entire post, which contains quotedpost plus more context
     return condescending_set
 
+def read_filtered_reddit():
+    """
+    Reads the filtered data scraped from 8 empowering subreddits. 
+    Returns:
+        A list of strings, where each string is a post title
+    """
+    df = pd.read_csv("data/reddit_scrape_filtered.csv", sep="\t", header=None)
+    # print(f"df size: {df.size}")
+    empowering_set = df.values.reshape(-1).tolist() # reshape flattens it because every string is in its own list, making a big list of lists
+    # print(empowering_set[:10])
+    return empowering_set
+
 def read_veiled_toxicity_clean():
     """
     Reads the unambiguously clean data from Han's Fortifying Toxic Speech Detectors paper 
