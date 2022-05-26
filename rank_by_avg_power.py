@@ -1,29 +1,33 @@
 import json
-from utils import read_talkdown, read_VAD_scores, read_veiled_toxicity_clean
+from utils import read_talkdown, read_VAD_scores, read_veiled_toxicity_clean, read_filtered_reddit, get_sentence_lexicon_score
+
+
+### Get power scores
+power_scores = read_VAD_scores("d") # d for dominance
 
 
 def get_sentences_with_power_scores(sentences):
     sentences_with_power = []
     for sentence in sentences:
         # print(f"SENTENCE: {sentence}")
-        word_power_scores = []
-        for word in sentence.split():
-            if word in power_scores:
-                # print("found a word in the power scores")
-                word_power_scores.append(power_scores[word])
-        # should I just skip anything that doesn't have any token in the power lexicon?
-        if len(word_power_scores) == 0: 
+        # word_power_scores = []
+        # for word in sentence.split():
+        #     if word in power_scores:
+        #         # print("found a word in the power scores")
+        #         word_power_scores.append(power_scores[word])
+        # # should I just skip anything that doesn't have any token in the power lexicon?
+        # if len(word_power_scores) == 0: 
+        #     continue
+        # sentence_avg_power = sum(word_power_scores) / len(word_power_scores) if len(word_power_scores) > 0 else None
+        sentence_avg_power = get_sentence_lexicon_score(sentence, power_scores)
+        if sentence_avg_power is None:
             continue
-        sentence_avg_power = sum(word_power_scores) / len(word_power_scores) if len(word_power_scores) > 0 else None
         # print(f"{sentence} :: {sentence_avg_power}")
         sentences_with_power.append({'sentence': sentence, 'power': sentence_avg_power})
 
     # print(len(sentences_with_power))
     return sentences_with_power
     
-
-### Get power scores
-power_scores = read_VAD_scores("d") # d for dominance
 
 
 ### Read condescending data from TalkDown
@@ -36,7 +40,9 @@ condescending_sorted_by_power = sorted(condescending_sentences_with_power, key=l
 
 
 ### Read clean data from Han's paper -- subset of SBIC that is unambiguously non-toxic
-clean_set = read_veiled_toxicity_clean()
+# clean_set = read_veiled_toxicity_clean()
+### Trying this again except with my own scraped Reddit data
+clean_set = read_filtered_reddit()
 clean_sentences_with_power = get_sentences_with_power_scores(clean_set)
 clean_sorted_by_power = sorted(clean_sentences_with_power, key=lambda x: x['power'], reverse=True) 
 

@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import csv
 
 
 def read_talkdown():
@@ -61,3 +62,43 @@ def read_VAD_scores(dimension_to_load):
             power_scores[word] = float(score)
             # print(f"power_scores[{word}] = {float(score)}")
     return power_scores
+
+def read_concreteness():
+    """
+    Reads concreteness scores from the concreteness lexicon.
+    Returns: 
+        A dictionary, where the keys (str) are the words in the lexicon and values (float) are their power score
+    """
+    # TODO: this currently doesn't account for the bigrams and only treats everything in the lexicon as a single word
+    concreteness_scores = {}
+    with open('lexicons/concreteness.csv', newline='') as csvfile:
+        csv_reader = csv.reader(csvfile)
+        for row in csv_reader:
+            # print(row)
+            token = row[0]
+            concreteness_mean_score = row[2]
+            concreteness_scores[token] = concreteness_mean_score
+    print(concreteness_scores)
+    return concreteness_scores
+
+
+def get_sentence_lexicon_score(sentence, lexicon):
+    """
+    Goes through each token in a sentence, looks it up in a given lexicon, collects scores of all the words found, and returns their average 
+    Args:
+        sentence: a string 
+        lexicon: a dictionary where the keys (str) are the words in the lexicon and values (float) are their score
+    Returns:
+        Average score of words in the sentence that did exist in the lexicon
+        None if no words in the sentence were found in the lexicon
+    """
+    individual_word_scores = []
+    for word in sentence.split():
+        if word in lexicon:
+            # print("found a word in the power scores")
+            individual_word_scores.append(lexicon[word])
+    # should I just skip anything that doesn't have any token in the power lexicon?
+    if len(individual_word_scores) == 0: 
+        return None
+    sentence_avg_power = sum(individual_word_scores) / len(individual_word_scores) # if len(individual_word_scores) > 0 else None
+    return sentence_avg_power
