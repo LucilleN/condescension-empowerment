@@ -79,7 +79,6 @@ def read_concreteness():
             token = row[0]
             concreteness_mean_score = float(row[2])
             concreteness_scores[token] = concreteness_mean_score
-    print(concreteness_scores)
     return concreteness_scores
 
 
@@ -98,10 +97,8 @@ def get_sentence_lexicon_score(sentence, lexicon):
         if word in lexicon:
             # print("found a word in the power scores")
             individual_word_scores.append(lexicon[word])
-            print(f"appending score {lexicon[word]} for {word} to individual_word_scores")
     # should I just skip anything that doesn't have any token in the power lexicon?
     if len(individual_word_scores) == 0: 
         return 0
-    print(individual_word_scores)
     sentence_avg_power = sum(individual_word_scores) / len(individual_word_scores) # if len(individual_word_scores) > 0 else None
     return sentence_avg_power
