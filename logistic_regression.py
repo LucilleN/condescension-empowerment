@@ -1,4 +1,7 @@
-from utils import read_talkdown, read_filtered_reddit, read_VAD_scores, read_concreteness
+from utils import read_talkdown, read_filtered_reddit, read_VAD_scores, read_concreteness, get_sentence_lexicon_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+
 
 ### Read TalkDown data as condescending set
 condescending_set = read_talkdown()
@@ -15,14 +18,36 @@ power_scores = read_VAD_scores("d") # d for dominance
 ### Load concreteness lexicon
 concreteness_scores = read_concreteness()
 
-### load LIWC
+### Load LIWC
 
 
-# feature extraction
+### Feature extraction
+X = [] # a list of lists, where rows are samples and columns are features
+y = [] # a list of 0's and 1's corresponding to the label of each sample. 0 = condescension, 1 = empowerment
+
+def get_feature_vector(sample):
+    sentence_avg_power = get_sentence_lexicon_score(sample, power_scores)
+    sentence_avg_agency = get_sentence_lexicon_score(sample, agency_scores)
+    sentence_avg_sentiment = get_sentence_lexicon_score(sample, sentiment_scores)
+    sentence_avg_concreteness = get_sentence_lexicon_score(sample, concreteness_scores)
+
+    return [sentence_avg_power, sentence_avg_agency, sentence_avg_sentiment, sentence_avg_concreteness]
+
+
 for sentence in condescending_set: 
-    sentence_avg_power = get_sentence_lexicon_score(sentence, power_scores)
-    sentence_avg_agency = get_sentence_lexicon_score(sentence, agency_scores)
-    sentence_avg_sentiment = get_sentence_lexicon_score(sentence, sentiment_scores)
-    sentence_avg_concreteness = get_sentence_lexicon_score(sentence, concreteness_scores)
-    # label 0 will mean condescension
-    # label 1 will mean empowerment
+    X.append(get_feature_vector(sentence))
+    y.append(0)
+
+for sentence in empowering_set:
+    X.append(get_feature_vector(sentence))
+    y.append(1)
+
+print(X)
+print(y)
+
+lr_model = LogisticRegression()
+
+lr_model.fit(X, y)
+
+predicted_labels = lr_model.predict(X)
+print(classification_report(y_true=y, y_pred=predicted_labels))
