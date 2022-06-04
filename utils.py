@@ -101,15 +101,12 @@ def read_LIWC_lexicon():
             print(f"category: {category}, number: {number}")
             liwc_words_by_category[category] = []
             category_num_to_name[int(number)] = category
-        
-        # print("category_num_to_name")
-        # print(category_num_to_name)
 
+        # then read the lines with words followed by category numbers
         for line in lines[words_start_at:]:
             line = line.strip()
             line = re.sub("<.*?>|[()/ ]", "\t", line)
             elements = line.split("\t")
-            # print(f"elements: {elements}")
             word = elements[0]
             categories = elements[1:]
             for category_number in categories:
@@ -117,9 +114,7 @@ def read_LIWC_lexicon():
                     continue
                 category_name = category_num_to_name[int(category_number)]
                 liwc_words_by_category[category_name].append(word)
-                # print(f"appending {word} to liwc_words_by_category[{category_name}]")
 
-    # print(liwc_words_by_category)
     return liwc_words_by_category
 
 def get_sentence_lexicon_score(sentence, lexicon):
