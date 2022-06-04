@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import csv
+import re
 
 
 def read_talkdown():
@@ -81,6 +82,45 @@ def read_concreteness():
             concreteness_scores[token] = concreteness_mean_score
     return concreteness_scores
 
+def read_LIWC_lexicon():
+    liwc_words_by_category = {}
+    category_num_to_name = {}
+
+    with open(f'lexicons/LIWC2007_English080730.dic') as f:
+        lines = f.readlines()
+        words_start_at = None
+
+        # read the categories first
+        for index in range(1, len(lines)):
+            line = lines[index]
+            line = line.strip()
+            if line == "%":
+                words_start_at = index + 1
+                break
+            number, category = line.split("\t")
+            print(f"category: {category}, number: {number}")
+            liwc_words_by_category[category] = []
+            category_num_to_name[int(number)] = category
+        
+        # print("category_num_to_name")
+        # print(category_num_to_name)
+
+        for line in lines[words_start_at:]:
+            line = line.strip()
+            line = re.sub("<.*?>|[()/ ]", "\t", line)
+            elements = line.split("\t")
+            # print(f"elements: {elements}")
+            word = elements[0]
+            categories = elements[1:]
+            for category_number in categories:
+                if category_number == "":
+                    continue
+                category_name = category_num_to_name[int(category_number)]
+                liwc_words_by_category[category_name].append(word)
+                # print(f"appending {word} to liwc_words_by_category[{category_name}]")
+
+    # print(liwc_words_by_category)
+    return liwc_words_by_category
 
 def get_sentence_lexicon_score(sentence, lexicon):
     """
