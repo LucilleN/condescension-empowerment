@@ -83,6 +83,8 @@ def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, 
 
         print("saving data to file...")
         data.to_pickle(filename)
+    
+    print(f"logistic_regression > load_or_generate_dataframe > len(data): {len(data)}")
     return data
 
 def plot_data(data):
@@ -91,23 +93,14 @@ def plot_data(data):
         plt.boxplot(data[column])
     plt.show()
 
-def remove_outliers(data, data_description):
-    ### THIS CURRENTLY DOES ABSOLUTELY NOTHING LOL
-    # for feature in data_description:
-    #     mean = data_description[feature]["mean"]
-    #     for data_point in data[feature]:
-    #         print(f" DATA POINT: {data_point}")
-    #         z_score = stattests.ztest([data_point], [mean])
-    #         print(f"z score is: {z_score}")
-    #         if z_score > 3:
-    #             print(">>>>   FOUND A Z SCORE > 3!!!!!!!!!!!!!!")
-    #         else: 
-    #             print(">>>>   NOT AN OUTLIER")
-    print(f"data.size() is {np.size(data)}")
+def remove_outliers(data):
+    # print(f"data.size() is {np.size(data)}")
+    print(f"data length is {len(data)}")
     rows_without_outliers = (np.abs(stats.zscore(data)) < 3).all(axis=1)
     trimmed_data = data[rows_without_outliers]
     print("AFTER REMOVING OUTLIERS")
-    print(f"data.size() is {np.size(data)}")
+    # print(f"data.size() is {np.size(trimmed_data)}")
+    print(f"trimmed_data length is {len(trimmed_data)}")
     return trimmed_data
 
 def save_descriptive_stats(data, out_file):
@@ -118,9 +111,13 @@ if __name__ == "__main__":
 
     ### Read TalkDown data as condescending set
     condescending_set = read_talkdown()
+    print(f"len(condescending_set): {len(condescending_set)}")
     ### Read filtered Reddit scrape as empowering set
     empowering_set = read_filtered_reddit()
-    empowering_set_abridged = read_filtered_reddit(abridged=True)
+    empowering_set_abridged = read_filtered_reddit(abridged=True, k=len(condescending_set))
+    print(f"len(empowering_set): {len(empowering_set)}")
+    print(f"len(empowering_set_abridged): {len(empowering_set_abridged)}")
+
 
     ### Load VAD lexicon
     sentiment_scores = read_VAD_scores("v") # v for valence
@@ -140,12 +137,22 @@ if __name__ == "__main__":
     data = load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
     data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
 
-    data_description = descriptivestats.describe(data)
-    # data_description.to_csv('descriptive_stats.csv', sep='\t')
     save_descriptive_stats(data, 'descriptive_stats_unabridged.csv')
     save_descriptive_stats(data_abridged, 'descriptive_stats_abridged.csv')
 
-    remove_outliers(data, data_description)
+    data_no_outliers = remove_outliers(data)
+    data_abridged_no_outliers = remove_outliers(data_abridged)
+    save_descriptive_stats(data_no_outliers, 'descriptive_stats_unabridged_no_outliers.csv')
+    save_descriptive_stats(data_abridged_no_outliers, 'descriptive_stats_abridged_no_outliers.csv')
+
+    different_datasets = [
+        data,
+        data_abridged,
+        data_no_outliers,
+        data_abridged_no_outliers
+    ]
+
+
     # plot_data(data)
 
     ### UNCOMMENT EVERYTHING BELOW
