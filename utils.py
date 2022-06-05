@@ -20,7 +20,7 @@ def read_talkdown():
             # condescending_set.append(data['post']) # This is the entire post, which contains quotedpost plus more context
     return condescending_set
 
-def read_filtered_reddit():
+def read_filtered_reddit(abridged=False, k=2602):
     """
     Reads the filtered data scraped from 8 empowering subreddits. 
     Returns:
@@ -30,6 +30,15 @@ def read_filtered_reddit():
     # print(f"df size: {df.size}")
     empowering_set = df.values.reshape(-1).tolist() # reshape flattens it because every string is in its own list, making a big list of lists
     # print(empowering_set[:10])
+
+    if abridged:
+        # using power as a rough estimator of empowerment / condescension so that we can take only the top 2k
+        empowering_set_with_power = get_sentences_with_power_scores(empowering_set)
+        emp_sorted_by_power = sorted(empowering_set_with_power, key=lambda x: x['power'], reverse=True) 
+        # Trim to length k
+        emp_sorted_by_power_trimmed = emp_sorted_by_power[:k]
+        return emp_sorted_by_power_trimmed
+    
     return empowering_set
 
 def read_veiled_toxicity_clean():
@@ -174,3 +183,14 @@ def get_LIWC_count(sentence, liwc_words_by_category, category):
         count,
         1 if count > 0 else 0,
         count / len(sentence))
+
+def get_sentences_with_power_scores(sentences):
+    sentences_with_power = []
+    power_scores = read_VAD_scores('d')
+    for sentence in sentences:
+        sentence_avg_power = get_sentence_lexicon_score(sentence, power_scores)
+        if sentence_avg_power is None:
+            continue
+        sentences_with_power.append({'sentence': sentence, 'power': sentence_avg_power})
+
+    return sentences_with_power
