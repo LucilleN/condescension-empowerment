@@ -37,7 +37,8 @@ def read_filtered_reddit(abridged=False, k=2602):
         emp_sorted_by_power = sorted(empowering_set_with_power, key=lambda x: x['power'], reverse=True) 
         # Trim to length k
         emp_sorted_by_power_trimmed = emp_sorted_by_power[:k]
-        return emp_sorted_by_power_trimmed
+        sentences_only = [item['sentence'] for item in emp_sorted_by_power_trimmed]
+        return sentences_only
     
     return empowering_set
 
@@ -141,6 +142,7 @@ def get_sentence_lexicon_score(sentence, lexicon):
         Average score of words in the sentence that did exist in the lexicon
         None if no words in the sentence were found in the lexicon
     """
+    # print(f"in utils > get_sentence_lexicon_score > sentence is type {type(sentence)}: {sentence}")
     individual_word_scores = []
     for word in sentence.split():
         if word in lexicon:

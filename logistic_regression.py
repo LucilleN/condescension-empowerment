@@ -13,9 +13,11 @@ import pandas as pd
 import numpy as np
 from os.path import exists
 import matplotlib.pyplot as plt
+from scipy import stats
 
 
 def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category):
+    # print(f"in logistic_regression > get_feature_vector > sentence is type {type(sentence)}: {sentence}")
     # print("Extracting VAD features...")
     avg_power = get_sentence_lexicon_score(sentence, power_scores)
     avg_agency = get_sentence_lexicon_score(sentence, agency_scores)
@@ -45,16 +47,21 @@ def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, 
     # print(feature_vector)
     return feature_vector
 
-def load_or_generate_data(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=False):
+def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=False):
     data = [] 
-    filename = "data.pkl"
-    if abridged:
-        filename = "data_abridged.pkl"
+    filename = "data_abridged.pkl" if abridged else "data_unabridged.pkl"
+    # if abridged:
+    #     filename = "data_abridged.pkl"
     if exists(filename):
         print("loading data...")
         data = pd.read_pickle(filename)
     else:
         for sentence in condescending_set:
+            # print("SENTENCE")
+            # print(sentence)
+            # print(str(sentence))
+            # sentence = str(sentence)
+            # print(type(sentence))
             data_point = [0] + get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
             data.append(data_point)
 
@@ -84,18 +91,28 @@ def plot_data(data):
         plt.boxplot(data[column])
     plt.show()
 
-def remove_outliers(data):
-    # for col in data:
-    #     for row in col:
-    #         for elem in row:
-    z_score = stattests.ztest(data)
-    print(f"z_score: {z_score}")
-    print(f"z_score size: {len(z_score)}")
-    print(f"z_score[0] size: {len(z_score[0])}")
-    print(f"z_score[1] size: {len(z_score[1])}")
+def remove_outliers(data, data_description):
+    ### THIS CURRENTLY DOES ABSOLUTELY NOTHING LOL
+    # for feature in data_description:
+    #     mean = data_description[feature]["mean"]
+    #     for data_point in data[feature]:
+    #         print(f" DATA POINT: {data_point}")
+    #         z_score = stattests.ztest([data_point], [mean])
+    #         print(f"z score is: {z_score}")
+    #         if z_score > 3:
+    #             print(">>>>   FOUND A Z SCORE > 3!!!!!!!!!!!!!!")
+    #         else: 
+    #             print(">>>>   NOT AN OUTLIER")
+    print(f"data.size() is {np.size(data)}")
+    rows_without_outliers = (np.abs(stats.zscore(data)) < 3).all(axis=1)
+    trimmed_data = data[rows_without_outliers]
+    print("AFTER REMOVING OUTLIERS")
+    print(f"data.size() is {np.size(data)}")
+    return trimmed_data
 
-    # rows_without_outliers = (np.abs(stats.zscore(df)) < 3).all(axis=1)
-    # return data[rows_without_outliers]
+def save_descriptive_stats(data, out_file):
+    data_description = descriptivestats.describe(data)
+    data_description.to_csv(out_file, sep='\t')
 
 if __name__ == "__main__":
 
@@ -120,16 +137,15 @@ if __name__ == "__main__":
     X = [] # a list of lists, where rows are samples and columns are features
     y = [] # a list of 0's and 1's corresponding to the label of each sample. 0 = condescension, 1 = empowerment
 
-    data = load_or_generate_data(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
+    data = load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
+    data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
 
     data_description = descriptivestats.describe(data)
-    data_description.to_csv('descriptive_stats.csv', sep='\t')
+    # data_description.to_csv('descriptive_stats.csv', sep='\t')
+    save_descriptive_stats(data, 'descriptive_stats_unabridged.csv')
+    save_descriptive_stats(data_abridged, 'descriptive_stats_abridged.csv')
 
-    for column in data:
-        data_description = descriptivestats.describe(data[column])
-        print(data_description)
-
-    remove_outliers(data)
+    remove_outliers(data, data_description)
     # plot_data(data)
 
     ### UNCOMMENT EVERYTHING BELOW
