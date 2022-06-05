@@ -83,6 +83,11 @@ def read_concreteness():
     return concreteness_scores
 
 def read_LIWC_lexicon():
+    """
+    Reads the LIWC lexicon.
+    Returns:
+        A dictionary, where the keys (str) are the names of categories, and values (list) are lists of words / word prefixes (str) that fall under that category.
+    """
     liwc_words_by_category = {}
     category_num_to_name = {}
 
@@ -137,3 +142,36 @@ def get_sentence_lexicon_score(sentence, lexicon):
         return 0
     sentence_avg_power = sum(individual_word_scores) / len(individual_word_scores) # if len(individual_word_scores) > 0 else None
     return sentence_avg_power
+
+def is_prefix(word, prefix):
+    prefix = prefix[1:]
+    return word.startswith(prefix)
+
+def get_LIWC_count(sentence, liwc_words_by_category, category):
+    """
+    Goes through each token in a sentence, looks it up in the LIWC dictionary, and returns a list of counts of the specified categories
+    Args:
+        sentence: a string
+        liwc_words_by_category: A dictionary, where the keys (str) are the names of categories, and values (list) are lists of words / word prefixes (str) that fall under that category
+        category: the LIWC category to for which we're trying to count words in the sentence
+    Returns:
+        A tuple of three numbers (integers and float) that contains the count of words in the sentence that fall under the specified category, followed by its binary version (1 if count is anything greater than 0), followed by the count divided by the sentence length.
+            Tuple format: (category_count, category_binary, category_normalized)
+    """
+    count = 0
+    words_in_this_category = liwc_words_by_category[category]
+    for word_in_category in words_in_this_category:
+        # handle regular words
+        if word_in_category in sentence.split():
+            count = count + sentence.count(word_in_category)
+        # handle word prefixes
+        elif '*' in word_in_category:            
+            for sentence_token in sentence.split():
+                if is_prefix(word=sentence_token, prefix=word_in_category):
+                    count = count + 1
+
+    # print(f"returning count of category {category}: {count}")
+    return (
+        count,
+        1 if count > 0 else 0,
+        count / len(sentence))
