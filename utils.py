@@ -103,7 +103,7 @@ def read_LIWC_lexicon():
                 words_start_at = index + 1
                 break
             number, category = line.split("\t")
-            print(f"category: {category}, number: {number}")
+            # print(f"category: {category}, number: {number}")
             liwc_words_by_category[category] = []
             category_num_to_name[int(number)] = category
 
