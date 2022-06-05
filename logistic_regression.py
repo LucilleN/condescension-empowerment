@@ -63,10 +63,10 @@ for sentence in empowering_set:
 
 data = pd.DataFrame(data, columns = [
     'is_empowering', # the label: 0 means condescending, 1 means empowering
-    'power', # float, a score between 0 and 1
-    'agency', # float, a score between 0 and 1
-    'sentiment', # float, a score between 0 and 1
-    'concreteness', # float, a score between 0 and 1
+    'power', 
+    'agency',
+    'sentiment',
+    'concreteness',
     "anger_count", "anger_binary", "anger_normalized",
     "social_count", "social_binary", "social_normalized",
     "relig_count", "relig_binary", "relig_normalized",

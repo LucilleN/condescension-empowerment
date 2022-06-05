@@ -170,7 +170,6 @@ def get_LIWC_count(sentence, liwc_words_by_category, category):
                 if is_prefix(word=sentence_token, prefix=word_in_category):
                     count = count + 1
 
-    # print(f"returning count of category {category}: {count}")
     return (
         count,
         1 if count > 0 else 0,
