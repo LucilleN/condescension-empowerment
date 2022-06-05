@@ -9,6 +9,7 @@ from utils import (
 import statsmodels.formula.api as smf
 import pandas as pd
 from os.path import exists
+import matplotlib.pyplot as plt
 
 
 def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category):
@@ -94,6 +95,8 @@ if __name__ == "__main__":
     y = [] # a list of 0's and 1's corresponding to the label of each sample. 0 = condescension, 1 = empowerment
 
     data = load_or_generate_data(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
+    data.plot()
+    plt.show()
 
     lr_model_1 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data).fit()
     
