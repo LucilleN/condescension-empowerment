@@ -137,13 +137,13 @@ if __name__ == "__main__":
     data = load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
     data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
 
-    save_descriptive_stats(data, 'descriptive_stats_unabridged.csv')
-    save_descriptive_stats(data_abridged, 'descriptive_stats_abridged.csv')
+    save_descriptive_stats(data, 'descriptive_stats/unabridged.csv')
+    save_descriptive_stats(data_abridged, 'descriptive_stats/abridged.csv')
 
     data_no_outliers = remove_outliers(data)
     data_abridged_no_outliers = remove_outliers(data_abridged)
-    save_descriptive_stats(data_no_outliers, 'descriptive_stats_unabridged_no_outliers.csv')
-    save_descriptive_stats(data_abridged_no_outliers, 'descriptive_stats_abridged_no_outliers.csv')
+    save_descriptive_stats(data_no_outliers, 'descriptive_stats/unabridged_no_outliers.csv')
+    save_descriptive_stats(data_abridged_no_outliers, 'descriptive_stats/abridged_no_outliers.csv')
 
     different_datasets = [
         data,
