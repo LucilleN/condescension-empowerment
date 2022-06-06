@@ -8,6 +8,7 @@ import statsmodels.stats.descriptivestats as descriptivestats
 from scipy import stats
 import matplotlib.pyplot as plt
 import math
+import seaborn as sns
 
 
 def read_talkdown():
@@ -265,16 +266,68 @@ def plot_data_boxplots(data, fig_title, subplot_names=None, num_rows=4, num_cols
         axs[axs_y, axs_x].boxplot(data[column_name])
         axs[axs_y, axs_x].set_title(column_name)
 
-        # by default, 20 subplots in 4 rows, 5 cols
-        # col   
-        # 1     1  2  3  4  5
-        # 2     6  7  8  9  10
-        # 3     11 12 13 14 15
-        # 4     16 17 18 19 20
-
     fig.subplots_adjust(bottom=0.05, top=0.9,
                         hspace=0.5, wspace=0.5)
 
     plt.suptitle(fig_title)
+
+    plt.show()
+
+def plot_data_pdfs(data, fig_title, subplot_names=None, num_rows=4, num_cols=5):
+    fig, axs = plt.subplots(num_rows, num_cols)
+    if subplot_names is None:
+        subplot_names = data[columns]
+
+    for index, column_name in enumerate(subplot_names):
+        if column_name not in subplot_names:
+            continue
+
+        axs_y = int(math.ceil(index / num_cols)) - 1
+        axs_x = index % num_cols - 1
+
+        sns.distplot(
+            data[column_name], 
+            ax=axs[axs_x, axs_y], 
+            hist=True, kde=True, 
+            bins=int(180/5))
+            
+        axs[axs_x, axs_y].set_title(fig_title)
+
+    fig.suptitle(fig_title)
+
+    plt.show()
+
+def plot_data(plot_type, data, fig_title, subplot_names=None, num_rows=4, num_cols=5):
+    assert plot_type == "boxplot" or plot_type == "pdf"
+    fig, axs = plt.subplots(num_rows, num_cols)
+    
+    if subplot_names is None:
+        subplot_names = data[columns]
+
+    for index, column_name in enumerate(subplot_names):
+        if column_name not in subplot_names:
+            continue
+
+        axs_y = int(math.ceil(index / num_cols)) - 1
+        axs_x = index % num_cols - 1
+
+        if plot_type == "boxplot":
+            axs[axs_y, axs_x].boxplot(data[column_name])
+            axs[axs_y, axs_x].set_title(column_name)
+
+        elif plot_type == "pdf":
+            sns.histplot(
+                data[column_name], 
+                ax=axs[axs_x, axs_y], 
+                # hist=True, 
+                kde=True, 
+                bins=int(20)
+            )
+                
+            # axs[axs_x, axs_y].set_title(fig_title)
+    
+    fig.subplots_adjust(bottom=0.08, top=0.9, hspace=0.3, wspace=0.3)
+
+    fig.suptitle(fig_title)
 
     plt.show()

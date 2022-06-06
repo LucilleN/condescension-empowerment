@@ -10,7 +10,9 @@ from utils import (
     save_descriptive_stats,
     plot_data_boxplots,
     print_model_summaries,
-    remove_outliers)
+    remove_outliers,
+    plot_data_pdfs,
+    plot_data)
 import statsmodels.formula.api as smf
 import statsmodels.stats.weightstats as stattests
 import pandas as pd
@@ -53,7 +55,6 @@ if __name__ == "__main__":
     print(f"len(empowering_set): {len(empowering_set)}")
     print(f"len(empowering_set_abridged): {len(empowering_set_abridged)}")
 
-
     ### Load VAD lexicon
     sentiment_scores = read_VAD_scores("v") # v for valence
     agency_scores = read_VAD_scores("a") # a for agency
@@ -89,9 +90,18 @@ if __name__ == "__main__":
 
     for dataset_name, dataset in different_datasets.items():
         # Plot a few selected columns
-        plot_data_boxplots(
-            dataset, 
-            dataset_name, 
+        plot_data(
+            plot_type="boxplot",
+            data=dataset, 
+            fig_title=dataset_name, 
+            subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
+            num_rows=3,
+            num_cols=3
+        )
+        plot_data(
+            plot_type="pdf",
+            data=dataset, 
+            fig_title=dataset_name, 
             subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
             num_rows=3,
             num_cols=3
@@ -99,13 +109,26 @@ if __name__ == "__main__":
 
     models = {}
 
+    # Trying four different datasets with simplest model
     lr_model_1 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data).fit()
     models['VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA'] = lr_model_1
-    lr_model_2 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged_no_outliers).fit()
-    models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS'] = lr_model_2
-    lr_model_3 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data).fit()
-    models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_3
-    lr_model_4 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
-    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_4
+    # perfect separation error for model 2
+    # lr_model_2 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_no_outliers).fit()
+    # models['VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA NO OUTLIERS'] = lr_model_2
+    lr_model_3 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged).fit()
+    models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_3
+    lr_model_4 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged_no_outliers).fit()
+    models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS'] = lr_model_4
+    
+    # Adding interactions
+    lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data).fit()
+    models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_5
+
+    # Adding LIWC features
+    lr_model_6 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_6
+    # linear matrix error for model 7
+    # lr_model_7 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged_no_outliers).fit()
+    # models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_7
 
     print_model_summaries(models)
