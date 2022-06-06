@@ -6,15 +6,14 @@ from utils import (
     get_sentence_lexicon_score, 
     read_LIWC_lexicon, 
     get_LIWC_count,
-    save_descriptive_stats)
+    load_or_generate_dataframe,
+    save_descriptive_stats,
+    plot_data_boxplots,
+    print_model_summaries,
+    remove_outliers)
 import statsmodels.formula.api as smf
 import statsmodels.stats.weightstats as stattests
 import pandas as pd
-import numpy as np
-from os.path import exists
-import matplotlib.pyplot as plt
-from scipy import stats
-import math
 
 
 def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category):
@@ -42,85 +41,6 @@ def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, 
         humans_count, humans_binary, humans_normalized]
     
     return feature_vector
-
-def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=False):
-    data = [] 
-    filename = "data_abridged.pkl" if abridged else "data_unabridged.pkl"
-    if exists(filename):
-        print("loading data...")
-        data = pd.read_pickle(filename)
-    else:
-        for sentence in condescending_set:
-            data_point = [0] + get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
-            data.append(data_point)
-
-        for sentence in empowering_set:
-            data_point = [1] + get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
-            data.append(data_point)
-
-        data = pd.DataFrame(data, columns = [
-            'is_empowering', # the label: 0 means condescending, 1 means empowering
-            'power', 
-            'agency',
-            'sentiment',
-            'concreteness',
-            "anger_count", "anger_binary", "anger_normalized",
-            "social_count", "social_binary", "social_normalized",
-            "relig_count", "relig_binary", "relig_normalized",
-            "sexual_count", "sexual_binary", "sexual_normalized",
-            "humans_count", "humans_binary", "humans_normalized"])
-
-        print("saving data to file...")
-        data.to_pickle(filename)
-    
-    print(f"logistic_regression > load_or_generate_dataframe > len(data): {len(data)}")
-    return data
-
-def plot_data_boxplots(data, fig_title, subplot_names=None, num_rows=4, num_cols=5):
-
-    fig, axs = plt.subplots(num_rows, num_cols)
-    if subplot_names is None:
-        subplot_names = data[columns]
-
-    for index, column_name in enumerate(subplot_names):
-        if column_name not in subplot_names:
-            continue
-
-        axs_y = int(math.ceil(index / num_cols)) - 1
-        axs_x = index % num_cols - 1
-
-        axs[axs_y, axs_x].boxplot(data[column_name])
-        axs[axs_y, axs_x].set_title(column_name)
-
-        # by default, 20 subplots in 4 rows, 5 cols
-        # col   
-        # 1     1  2  3  4  5
-        # 2     6  7  8  9  10
-        # 3     11 12 13 14 15
-        # 4     16 17 18 19 20
-
-    fig.subplots_adjust(bottom=0.05, top=0.9,
-                        hspace=0.5, wspace=0.5)
-
-    plt.suptitle(fig_title)
-
-    plt.show()
-
-def remove_outliers(data):
-    # print(f"data.size() is {np.size(data)}")
-    print(f"data length is {len(data)}")
-    rows_without_outliers = (np.abs(stats.zscore(data)) < 3).all(axis=1)
-    trimmed_data = data[rows_without_outliers]
-    print("AFTER REMOVING OUTLIERS")
-    # print(f"data.size() is {np.size(trimmed_data)}")
-    print(f"trimmed_data length is {len(trimmed_data)}")
-    return trimmed_data
-
-def print_model_summaries(models):
-    for model_name, model in models.items():
-        print(f"\n\n######### {model_name} #########\n")
-        print(model.summary())
-
 
 if __name__ == "__main__":
 
@@ -177,7 +97,6 @@ if __name__ == "__main__":
             num_cols=3
         )
 
-    ### UNCOMMENT EVERYTHING BELOW
     models = {}
 
     lr_model_1 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data).fit()
@@ -188,30 +107,5 @@ if __name__ == "__main__":
     models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_3
     lr_model_4 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
     models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_4
-   
-    # Model 5 fails to converge, tried a lot of things
-    # lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness * anger_count * social_count * relig_count * sexual_count * humans_count", data=data).fit()
-    # lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness * anger_binary * social_binary * relig_binary * sexual_binary * humans_binary", data=data).fit()
-    # Trying to exclude anger because it was not a significant predictor, as well as social_count and sexual_count because they were significant but had small beta's
-    # Still doesn't converge for all of the below
-    # lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness * relig_count * humans_count", data=data).fit()
-    # lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness * relig_count * humans_count", data=data).fit(maxiter=100)
-    # lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness * humans_count", data=data).fit(maxiter=100)
 
     print_model_summaries(models)
-
-    # print("\n\n######### MODEL 1: VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA #########\n")
-    # print(lr_model_1.summary())
-
-    # print("\n\n######### MODEL 2: VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS #########\n")
-    # print(lr_model_2.summary())
-
-    # print("\n\n######### MODEL 3: VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA #########\n")
-    # print(lr_model_3.summary())
-
-    # print("\n\n######### MODEL 4: VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA #########\n")
-    # print(lr_model_4.summary())
-
-    # This one fails to converge
-    # print("\n\n######### MODEL 5: VAD, CONCRETENESS, AND LIWC COUNTS, WITH INTERACTIONS #########\n")
-    # print(lr_model_4.summary())
