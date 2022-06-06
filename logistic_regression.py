@@ -18,16 +18,12 @@ import math
 
 
 def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category):
-    # print(f"in logistic_regression > get_feature_vector > sentence is type {type(sentence)}: {sentence}")
-    # print("Extracting VAD features...")
     avg_power = get_sentence_lexicon_score(sentence, power_scores)
     avg_agency = get_sentence_lexicon_score(sentence, agency_scores)
     avg_sentiment = get_sentence_lexicon_score(sentence, sentiment_scores)
 
-    # print("Extracting Concreteness features...")
     avg_concreteness = get_sentence_lexicon_score(sentence, concreteness_scores)
 
-    # print("Extracting LIWC features...")
     anger_count, anger_binary, anger_normalized = get_LIWC_count(sentence, liwc_words_by_category, "anger")
     social_count, social_binary, social_normalized = get_LIWC_count(sentence, liwc_words_by_category, "social")
     relig_count, relig_binary, relig_normalized = get_LIWC_count(sentence, liwc_words_by_category, "relig")
@@ -45,24 +41,16 @@ def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, 
         sexual_count, sexual_binary, sexual_normalized,
         humans_count, humans_binary, humans_normalized]
     
-    # print(feature_vector)
     return feature_vector
 
 def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=False):
     data = [] 
     filename = "data_abridged.pkl" if abridged else "data_unabridged.pkl"
-    # if abridged:
-    #     filename = "data_abridged.pkl"
     if exists(filename):
         print("loading data...")
         data = pd.read_pickle(filename)
     else:
         for sentence in condescending_set:
-            # print("SENTENCE")
-            # print(sentence)
-            # print(str(sentence))
-            # sentence = str(sentence)
-            # print(type(sentence))
             data_point = [0] + get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
             data.append(data_point)
 
@@ -88,14 +76,15 @@ def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, 
     print(f"logistic_regression > load_or_generate_dataframe > len(data): {len(data)}")
     return data
 
-def plot_data(data, fig_title):
-    num_rows = 4
-    num_cols = 5
+def plot_data(data, fig_title, subplot_names=None, num_rows=4, num_cols=5):
 
     fig, axs = plt.subplots(num_rows, num_cols)
+    if subplot_names is None:
+        subplot_names = data[columns]
 
-    for index, column in enumerate(data):
-        column_name = data.columns[index]
+    for index, column_name in enumerate(subplot_names):
+        if column_name not in subplot_names:
+            continue
 
         axs_y = int(math.ceil(index / num_cols)) - 1
         axs_x = index % num_cols - 1
@@ -103,12 +92,12 @@ def plot_data(data, fig_title):
         axs[axs_y, axs_x].boxplot(data[column_name])
         axs[axs_y, axs_x].set_title(column_name)
 
-        # 4 rows, 5 cols
-
-        # 1  1  2  3  4  5
-        # 2  6  7  8  9  10
-        # 3  11 12 13 14 15
-        # 4  16 17 18 19 20
+        # by default, 20 subplots in 4 rows, 5 cols
+        # col   
+        # 1     1  2  3  4  5
+        # 2     6  7  8  9  10
+        # 3     11 12 13 14 15
+        # 4     16 17 18 19 20
 
     fig.subplots_adjust(bottom=0.05, top=0.9,
                         hspace=0.5, wspace=0.5)
@@ -175,7 +164,15 @@ if __name__ == "__main__":
     }
 
     for dataset_name, dataset in different_datasets.items():
-        plot_data(dataset, dataset_name)
+        plot_data(
+            dataset, 
+            dataset_name, 
+            subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
+            num_rows=3,
+            num_cols=3
+        )
+
+        
 
     ### UNCOMMENT EVERYTHING BELOW
 

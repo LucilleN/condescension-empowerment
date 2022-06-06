@@ -28,9 +28,7 @@ def read_filtered_reddit(abridged=False, k=2602):
         A list of strings, where each string is a post title
     """
     df = pd.read_csv("data/reddit_scrape_filtered.csv", sep="\t", header=None)
-    # print(f"df size: {df.size}")
     empowering_set = df.values.reshape(-1).tolist() # reshape flattens it because every string is in its own list, making a big list of lists
-    # print(empowering_set[:10])
 
     if abridged:
         # using power as a rough estimator of empowerment / condescension so that we can take only the top 2k
@@ -143,11 +141,9 @@ def get_sentence_lexicon_score(sentence, lexicon):
         Average score of words in the sentence that did exist in the lexicon
         None if no words in the sentence were found in the lexicon
     """
-    # print(f"in utils > get_sentence_lexicon_score > sentence is type {type(sentence)}: {sentence}")
     individual_word_scores = []
     for word in sentence.split():
         if word in lexicon:
-            # print("found a word in the power scores")
             individual_word_scores.append(lexicon[word])
     # should I just skip anything that doesn't have any token in the power lexicon?
     if len(individual_word_scores) == 0: 
