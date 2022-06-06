@@ -116,6 +116,10 @@ def remove_outliers(data):
     print(f"trimmed_data length is {len(trimmed_data)}")
     return trimmed_data
 
+def print_model_summaries(models):
+    for model_name, model in models.items():
+        print(f"\n\n######### {model_name} #########\n")
+        print(model.summary())
 
 
 if __name__ == "__main__":
@@ -174,14 +178,16 @@ if __name__ == "__main__":
         )
 
     ### UNCOMMENT EVERYTHING BELOW
-
+    models = {}
 
     lr_model_1 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data).fit()
+    models['VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA'] = lr_model_1
     lr_model_2 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged_no_outliers).fit()
-    
+    models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS'] = lr_model_2
     lr_model_3 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data).fit()
-    
+    models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_3
     lr_model_4 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_4
    
     # Model 5 fails to converge, tried a lot of things
     # lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness * anger_count * social_count * relig_count * sexual_count * humans_count", data=data).fit()
@@ -192,17 +198,19 @@ if __name__ == "__main__":
     # lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness * relig_count * humans_count", data=data).fit(maxiter=100)
     # lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness * humans_count", data=data).fit(maxiter=100)
 
-    print("\n\n######### MODEL 1: VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA #########\n")
-    print(lr_model_1.summary())
+    print_model_summaries(models)
 
-    print("\n\n######### MODEL 2: VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS #########\n")
-    print(lr_model_2.summary())
+    # print("\n\n######### MODEL 1: VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA #########\n")
+    # print(lr_model_1.summary())
 
-    print("\n\n######### MODEL 3: VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA #########\n")
-    print(lr_model_3.summary())
+    # print("\n\n######### MODEL 2: VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS #########\n")
+    # print(lr_model_2.summary())
 
-    print("\n\n######### MODEL 4: VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA #########\n")
-    print(lr_model_4.summary())
+    # print("\n\n######### MODEL 3: VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA #########\n")
+    # print(lr_model_3.summary())
+
+    # print("\n\n######### MODEL 4: VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA #########\n")
+    # print(lr_model_4.summary())
 
     # This one fails to converge
     # print("\n\n######### MODEL 5: VAD, CONCRETENESS, AND LIWC COUNTS, WITH INTERACTIONS #########\n")
