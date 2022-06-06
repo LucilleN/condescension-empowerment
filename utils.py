@@ -251,52 +251,6 @@ def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, 
     
     return data
 
-def plot_data_boxplots(data, fig_title, subplot_names=None, num_rows=4, num_cols=5):
-    fig, axs = plt.subplots(num_rows, num_cols)
-    if subplot_names is None:
-        subplot_names = data[columns]
-
-    for index, column_name in enumerate(subplot_names):
-        if column_name not in subplot_names:
-            continue
-
-        axs_y = int(math.ceil(index / num_cols)) - 1
-        axs_x = index % num_cols - 1
-
-        axs[axs_y, axs_x].boxplot(data[column_name])
-        axs[axs_y, axs_x].set_title(column_name)
-
-    fig.subplots_adjust(bottom=0.05, top=0.9,
-                        hspace=0.5, wspace=0.5)
-
-    plt.suptitle(fig_title)
-
-    plt.show()
-
-def plot_data_pdfs(data, fig_title, subplot_names=None, num_rows=4, num_cols=5):
-    fig, axs = plt.subplots(num_rows, num_cols)
-    if subplot_names is None:
-        subplot_names = data[columns]
-
-    for index, column_name in enumerate(subplot_names):
-        if column_name not in subplot_names:
-            continue
-
-        axs_y = int(math.ceil(index / num_cols)) - 1
-        axs_x = index % num_cols - 1
-
-        sns.distplot(
-            data[column_name], 
-            ax=axs[axs_x, axs_y], 
-            hist=True, kde=True, 
-            bins=int(180/5))
-            
-        axs[axs_x, axs_y].set_title(fig_title)
-
-    fig.suptitle(fig_title)
-
-    plt.show()
-
 def plot_data(plot_type, data, fig_title, subplot_names=None, num_rows=4, num_cols=5):
     assert plot_type == "boxplot" or plot_type == "pdf"
     fig, axs = plt.subplots(num_rows, num_cols)

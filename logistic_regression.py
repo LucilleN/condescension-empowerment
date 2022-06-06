@@ -8,10 +8,8 @@ from utils import (
     get_LIWC_count,
     load_or_generate_dataframe,
     save_descriptive_stats,
-    plot_data_boxplots,
     print_model_summaries,
     remove_outliers,
-    plot_data_pdfs,
     plot_data)
 import statsmodels.formula.api as smf
 import statsmodels.stats.weightstats as stattests
