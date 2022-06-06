@@ -2,6 +2,7 @@ import json
 import pandas as pd
 import csv
 import re
+import statsmodels.stats.descriptivestats as descriptivestats
 
 
 def read_talkdown():
@@ -196,3 +197,7 @@ def get_sentences_with_power_scores(sentences):
         sentences_with_power.append({'sentence': sentence, 'power': sentence_avg_power})
 
     return sentences_with_power
+
+def save_descriptive_stats(data, out_file):
+    data_description = descriptivestats.describe(data)
+    data_description.to_csv(out_file, sep='\t')

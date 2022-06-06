@@ -5,10 +5,10 @@ from utils import (
     read_concreteness, 
     get_sentence_lexicon_score, 
     read_LIWC_lexicon, 
-    get_LIWC_count)
+    get_LIWC_count,
+    save_descriptive_stats)
 import statsmodels.formula.api as smf
 import statsmodels.stats.weightstats as stattests
-import statsmodels.stats.descriptivestats as descriptivestats
 import pandas as pd
 import numpy as np
 from os.path import exists
@@ -88,7 +88,7 @@ def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, 
     print(f"logistic_regression > load_or_generate_dataframe > len(data): {len(data)}")
     return data
 
-def plot_data(data):
+def plot_data(data, fig_title):
     num_rows = 4
     num_cols = 5
 
@@ -113,8 +113,7 @@ def plot_data(data):
     fig.subplots_adjust(bottom=0.05, top=0.9,
                         hspace=0.5, wspace=0.5)
 
-    # fig, ax = plt.subplots()
-    # ax.boxplot(data)
+    plt.suptitle(fig_title)
 
     plt.show()
 
@@ -128,9 +127,7 @@ def remove_outliers(data):
     print(f"trimmed_data length is {len(trimmed_data)}")
     return trimmed_data
 
-def save_descriptive_stats(data, out_file):
-    data_description = descriptivestats.describe(data)
-    data_description.to_csv(out_file, sep='\t')
+
 
 if __name__ == "__main__":
 
@@ -160,25 +157,25 @@ if __name__ == "__main__":
     y = [] # a list of 0's and 1's corresponding to the label of each sample. 0 = condescension, 1 = empowerment
 
     data = load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
-    # data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
+    data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
 
-    # save_descriptive_stats(data, 'descriptive_stats/unabridged.csv')
-    # save_descriptive_stats(data_abridged, 'descriptive_stats/abridged.csv')
+    save_descriptive_stats(data, 'descriptive_stats/unabridged.csv')
+    save_descriptive_stats(data_abridged, 'descriptive_stats/abridged.csv')
 
-    # data_no_outliers = remove_outliers(data)
-    # data_abridged_no_outliers = remove_outliers(data_abridged)
-    # save_descriptive_stats(data_no_outliers, 'descriptive_stats/unabridged_no_outliers.csv')
-    # save_descriptive_stats(data_abridged_no_outliers, 'descriptive_stats/abridged_no_outliers.csv')
+    data_no_outliers = remove_outliers(data)
+    data_abridged_no_outliers = remove_outliers(data_abridged)
+    save_descriptive_stats(data_no_outliers, 'descriptive_stats/unabridged_no_outliers.csv')
+    save_descriptive_stats(data_abridged_no_outliers, 'descriptive_stats/abridged_no_outliers.csv')
 
-    # different_datasets = [
-    #     data,
-    #     data_abridged,
-    #     data_no_outliers,
-    #     data_abridged_no_outliers
-    # ]
+    different_datasets = {
+        'Unabridged Data': data,
+        'Abridged Data': data_abridged,
+        'Unabridged Data w/o Outliers': data_no_outliers,
+        'Abridged Data w/o Outliers': data_abridged_no_outliers
+    }
 
-
-    plot_data(data)
+    for dataset_name, dataset in different_datasets.items():
+        plot_data(dataset, dataset_name)
 
     ### UNCOMMENT EVERYTHING BELOW
 
