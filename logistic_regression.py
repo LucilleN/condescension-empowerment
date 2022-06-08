@@ -86,24 +86,24 @@ if __name__ == "__main__":
         'Abridged Data w/o Outliers': data_abridged_no_outliers
     }
 
-    for dataset_name, dataset in different_datasets.items():
-        # Plot a few selected columns
-        plot_data(
-            plot_type="boxplot",
-            data=dataset, 
-            fig_title=dataset_name, 
-            subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
-            num_rows=3,
-            num_cols=3
-        )
-        plot_data(
-            plot_type="pdf",
-            data=dataset, 
-            fig_title=dataset_name, 
-            subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
-            num_rows=3,
-            num_cols=3
-        )
+    # for dataset_name, dataset in different_datasets.items():
+    #     # Plot a few selected columns
+    #     plot_data(
+    #         plot_type="boxplot",
+    #         data=dataset, 
+    #         fig_title=dataset_name, 
+    #         subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
+    #         num_rows=3,
+    #         num_cols=3
+    #     )
+    #     plot_data(
+    #         plot_type="pdf",
+    #         data=dataset, 
+    #         fig_title=dataset_name, 
+    #         subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
+    #         num_rows=3,
+    #         num_cols=3
+    #     )
 
     models = {}
 
@@ -121,12 +121,21 @@ if __name__ == "__main__":
     # Adding interactions
     lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data).fit()
     models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_5
+    # Singular matrix error for model 6
+    # lr_model_6 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data_abridged).fit()
+    # models['VAD, CONCRETENESS, WITH INTERACTIONS, ABRIDGED DATA'] = lr_model_6
+    # Trying again with different abridged data
+    # Nope still doesn't work
+    # lr_model_6 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data_abridged_no_outliers).fit()
+    # models['VAD, CONCRETENESS, WITH INTERACTIONS, ABRIDGED DATA'] = lr_model_6
 
     # Adding LIWC features
-    lr_model_6 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
-    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_6
-    # linear matrix error for model 7
-    # lr_model_7 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged_no_outliers).fit()
-    # models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_7
-
+    lr_model_7 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_7
+    # linear matrix error for model 8
+    # lr_model_8 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged_no_outliers).fit()
+    # models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_8
+    lr_model_9 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged).fit()
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_9
+    
     print_model_summaries(models)
