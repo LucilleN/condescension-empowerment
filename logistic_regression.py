@@ -86,24 +86,24 @@ if __name__ == "__main__":
         'Abridged Data w/o Outliers': data_abridged_no_outliers
     }
 
-    # for dataset_name, dataset in different_datasets.items():
-    #     # Plot a few selected columns
-    #     plot_data(
-    #         plot_type="boxplot",
-    #         data=dataset, 
-    #         fig_title=dataset_name, 
-    #         subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
-    #         num_rows=3,
-    #         num_cols=3
-    #     )
-    #     plot_data(
-    #         plot_type="pdf",
-    #         data=dataset, 
-    #         fig_title=dataset_name, 
-    #         subplot_names=['is_empowering', 'power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
-    #         num_rows=3,
-    #         num_cols=3
-    #     )
+    for dataset_name, dataset in different_datasets.items():
+        # Plot a few selected columns
+        plot_data(
+            plot_type="boxplot",
+            data=dataset, 
+            fig_title=dataset_name, 
+            subplot_names=['power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
+            num_rows=3,
+            num_cols=3
+        )
+        plot_data(
+            plot_type="pdf",
+            data=dataset, 
+            fig_title=dataset_name, 
+            subplot_names=['power', 'agency', 'sentiment', 'concreteness', "anger_count", "social_count", "relig_count", "sexual_count","humans_count"], 
+            num_rows=3,
+            num_cols=3
+        )
 
     models = {}
 

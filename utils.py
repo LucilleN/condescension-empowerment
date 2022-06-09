@@ -272,7 +272,7 @@ def plot_data(plot_type, data, fig_title, subplot_names=None, num_rows=4, num_co
         elif plot_type == "pdf":
             sns.histplot(
                 data[column_name], 
-                ax=axs[axs_x, axs_y], 
+                ax=axs[axs_y, axs_x], 
                 # hist=True, 
                 kde=True, 
                 bins=int(20)
