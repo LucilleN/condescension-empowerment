@@ -110,32 +110,19 @@ if __name__ == "__main__":
     # Trying four different datasets with simplest model
     lr_model_1 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data).fit()
     models['VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA'] = lr_model_1
-    # perfect separation error for model 2
-    # lr_model_2 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_no_outliers).fit()
-    # models['VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA NO OUTLIERS'] = lr_model_2
-    lr_model_3 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged).fit()
+    lr_model_2 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged).fit()
     models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_3
-    lr_model_4 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged_no_outliers).fit()
+    lr_model_3 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged_no_outliers).fit()
     models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS'] = lr_model_4
     
     # Adding interactions
-    lr_model_5 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data).fit()
+    lr_model_4 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data).fit()
     models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_5
-    # Singular matrix error for model 6
-    # lr_model_6 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data_abridged).fit()
-    # models['VAD, CONCRETENESS, WITH INTERACTIONS, ABRIDGED DATA'] = lr_model_6
-    # Trying again with different abridged data
-    # Nope still doesn't work
-    # lr_model_6 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data_abridged_no_outliers).fit()
-    # models['VAD, CONCRETENESS, WITH INTERACTIONS, ABRIDGED DATA'] = lr_model_6
 
     # Adding LIWC features
-    lr_model_7 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
+    lr_model_5 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
     models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_7
-    # linear matrix error for model 8
-    # lr_model_8 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged_no_outliers).fit()
-    # models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_8
-    lr_model_9 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged).fit()
+    lr_model_6 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged).fit()
     models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_9
     
     print_model_summaries(models)
