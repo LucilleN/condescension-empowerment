@@ -150,23 +150,29 @@ if __name__ == "__main__":
     #     print(f"type: {type(item)}, length: {len(item)}, item: {item}")
     #     print(f"row['sentence']: {row['sentence']}")
     #     print(f"row['embedding']: {row['embedding']}")
+   
 
     talkup_matched = []
-    for index, row in talkdown_embeds.iterrows():
-        # print(tup)
-        s1 = row['sentence']
-        embed1 = row['embedding']
-        print(f"TalkDown sentence: {s1}") #, \nembedding: {embed1}")
-        matched_sentence = get_most_similar_sentence(s1, embed1, talkup_embeds)
-        # print(f"\nTalkDown sentence: {s1}")
-        print(f"Matched with TalkUp sentence: {matched_sentence}")
-        talkup_matched.append(matched_sentence)
+   
+    if exists("talkup_matched.csv"):
+        df = pd.read_csv("talkup_matched.csv")
+        talkup_matched = df.values.reshape(-1).tolist()
+    else:
+        for index, row in talkdown_embeds.iterrows():
+            # print(tup)
+            s1 = row['sentence']
+            embed1 = row['embedding']
+            print(f"TalkDown sentence: {s1}") #, \nembedding: {embed1}")
+            matched_sentence = get_most_similar_sentence(s1, embed1, talkup_embeds)
+            # print(f"\nTalkDown sentence: {s1}")
+            print(f"Matched with TalkUp sentence: {matched_sentence}")
+            talkup_matched.append(matched_sentence)
 
-    pd.DataFrame(talkup_matched).to_csv("talkup_matched.csv")
+        pd.DataFrame(talkup_matched).to_csv("talkup_matched.csv")
 
-    # empowering_set_abridged = read_filtered_reddit(abridged=True, k=len(condescending_set))
+    empowering_set_abridged = read_filtered_reddit(abridged=True, k=len(condescending_set))
     # print(f"len(empowering_set): {len(empowering_set)}")
-    # print(f"len(empowering_set_abridged): {len(empowering_set_abridged)}")
+    print(f"len(empowering_set_abridged): {len(empowering_set_abridged)}")
 
     ### Load VAD lexicon
     sentiment_scores = read_VAD_scores("v") # v for valence
@@ -184,9 +190,11 @@ if __name__ == "__main__":
     # y = [] # a list of 0's and 1's corresponding to the label of each sample. 0 = condescension, 1 = empowerment
 
     # data = load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
-    # data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
-
-    talkup_data = load_or_generate_dataframe(condescending_set, talkup_matched, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
+    data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
+    data_matched = load_or_generate_dataframe(condescending_set, talkup_matched, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
+    print("POTATO POTATO POTATO")
+    print(f"len(talkup_matched): {len(talkup_matched)}")
+    print(f"len(data_matched): {len(data_matched)}")
 
 
     # save_descriptive_stats(data, 'descriptive_stats/unabridged.csv')
@@ -223,24 +231,39 @@ if __name__ == "__main__":
     #         num_cols=3
     #     )
 
-    # models = {}
+    models = {}
 
     # # Trying four different datasets with simplest model
     # lr_model_1 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data).fit()
     # models['VAD, CONCRETENESS, NO INTERACTIONS, FULL DATA'] = lr_model_1
     # lr_model_2 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged).fit()
-    # models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_3
+    # models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_2
     # lr_model_3 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness", data=data_abridged_no_outliers).fit()
-    # models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS'] = lr_model_4
+    # models['VAD, CONCRETENESS, NO INTERACTIONS, ABRIDGED DATA NO OUTLIERS'] = lr_model_3
     
     # # Adding interactions
     # lr_model_4 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data).fit()
-    # models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_5
+    # models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_4
 
     # # Adding LIWC features
     # lr_model_5 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
-    # models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_7
-    # lr_model_6 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged).fit()
-    # models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_9
+    # models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_5
+    lr_model_6 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged).fit()
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_6
     
-    # print_model_summaries(models)
+    lr_model_7 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_matched).fit()
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, MATCHED DATA'] = lr_model_7
+    
+
+    print_model_summaries(models)
+
+
+    print(f"len(talkup_matched): {len(talkup_matched)}")
+    print(f"len(data_matched): {len(data_matched)}")
+
+    print(f"len(empowering_set_abridged): {len(empowering_set_abridged)}")
+    print(f"len(data_abridged): {len(data_abridged)}")
+
+    print(talkup_matched)
+    print("\n\n\n")
+    print(empowering_set_abridged)

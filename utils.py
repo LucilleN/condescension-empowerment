@@ -219,9 +219,11 @@ def remove_outliers(data):
     print(f"trimmed_data length is {len(trimmed_data)}")
     return trimmed_data
 
-def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=False):
+def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=False, matched=False):
     data = [] 
     filename = "data_abridged.pkl" if abridged else "data_unabridged.pkl"
+    if matched:
+        filename = "data_matched.pkl" 
     if exists(filename):
         print("loading data...")
         data = pd.read_pickle(filename)
