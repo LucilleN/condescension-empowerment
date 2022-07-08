@@ -131,6 +131,7 @@ dmypy.json
 # Ignore data folders
 /data
 /lexicons
+/sentence_embeddings
 
 # Ignore outputs I'm saving just for reference
 /outputs
