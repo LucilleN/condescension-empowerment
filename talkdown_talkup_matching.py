@@ -19,6 +19,8 @@ from sentence_transformers import SentenceTransformer
 from numpy import dot
 from numpy.linalg import norm
 
+# using this library: https://huggingface.co/sentence-transformers/all-mpnet-base-v2
+# errors with installing the sentence_transformers library can be solved with this solution: https://github.com/UKPLab/sentence-transformers/issues/128
 model = SentenceTransformer('all-mpnet-base-v2')
 
 
@@ -70,19 +72,19 @@ def cosine_similarity(vector1, vector2):
 def get_most_similar_sentence(s1, embed1, sentence_embeddings):
     highest_similarity = 0
     matched_sentence = None
-    for tup in sentence_embeddings:
-        s2 = tup[0]
-        embed2 = tup[1]
+    for index, row in sentence_embeddings.iterrows():
+        s2 = row['sentence']
+        embed2 = row['embedding']
         similarity = cosine_similarity(embed1, embed2)
-        print(f"found cosine similarity of {similarity}")
+        # print(f"found cosine similarity of {similarity}")
         if similarity > highest_similarity:
             highest_similarity = similarity
             print(f"Highest similarity is now {highest_similarity}")
             matched_sentence = s2
     
-    print(f"Sentence 1: {s1}")
-    print(f"MATCHED WITH")
-    print(f"Sentence 2: {matched_sentence}")
+    # print(f"Sentence 1: {s1}")
+    # print(f"MATCHED WITH")
+    # print(f"Sentence 2: {matched_sentence}")
     return matched_sentence
 
 
@@ -118,35 +120,45 @@ if __name__ == "__main__":
         talkup_embeds = pd.DataFrame(talkup_embeds, columns =['sentence', 'embedding'])
         talkup_embeds.to_pickle("talkup_embeddings.pkl")
 
-    random_test_sentences = [
-        "Plants photosynthesize to produce their own energy",
-        "That's a dumb reason to vote for anyone, regardless of what you think of immigration",
-        "I like cats",
-        "I like dogs",
-        "The mitochondria is the powerhouse of the cell",
-        "What the fuck",
-        "I don't see why you would think that",
-        "I can't understand why you think that way",
-        "What are all these Mexicans doing here? It's America. I'm voting for Trump because he'll build a wall."
-    ]
-    test_embeds = get_sentence_embeddings(random_test_sentences)
-    for item in test_embeds:
-        # print(item)
-        print("LIST ELEMENT IS OF TYPE:")
-        print(type(item))
-        print(len(item))
-        print(type(item[0]))
-        print(type(item[1]))
+    # random_test_sentences = [
+    #     "Plants photosynthesize to produce their own energy",
+    #     "That's a dumb reason to vote for anyone, regardless of what you think of immigration",
+    #     "I like cats",
+    #     "I like dogs",
+    #     "The mitochondria is the powerhouse of the cell",
+    #     "What the fuck",
+    #     "I don't see why you would think that",
+    #     "I can't understand why you think that way",
+    #     "What are all these Mexicans doing here? It's America. I'm voting for Trump because he'll build a wall."
+    # ]
+    # test_embeds = get_sentence_embeddings(random_test_sentences)
+    # for item in test_embeds:
+    #     # print(item)
+    #     print("LIST ELEMENT IS OF TYPE:")
+    #     print(type(item))
+    #     print(len(item))
+    #     print(type(item[0]))
+    #     print(type(item[1]))
 
-    get_most_similar_sentence(test_embeds[0][0], test_embeds[0][1], test_embeds)
+    # get_most_similar_sentence(test_embeds[0][0], test_embeds[0][1], test_embeds)
+
+    # for index, row in talkup_embeds.iterrows():
+    #     print(f"type: {type(item)}, length: {len(item)}, item: {row}")
+    #     print(f"row['sentence']: {row['sentence']}")
+    #     print(f"row['embedding']: {row['embedding']}")
+    # for index, row in talkdown_embeds.iterrows()[:10]:
+    #     print(f"type: {type(item)}, length: {len(item)}, item: {item}")
+    #     print(f"row['sentence']: {row['sentence']}")
+    #     print(f"row['embedding']: {row['embedding']}")
 
     talkup_matched = []
-    for tup in talkdown_embeds:
-        print(tup)
-        s1 = tup[0]
-        embed1 = tup[1]
+    for index, row in talkdown_embeds.iterrows():
+        # print(tup)
+        s1 = row['sentence']
+        embed1 = row['embedding']
+        print(f"TalkDown sentence: {s1}") #, \nembedding: {embed1}")
         matched_sentence = get_most_similar_sentence(s1, embed1, talkup_embeds)
-        print(f"\nTalkDown sentence: {s1}")
+        # print(f"\nTalkDown sentence: {s1}")
         print(f"Matched with TalkUp sentence: {matched_sentence}")
         talkup_matched.append(matched_sentence)
 
