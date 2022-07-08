@@ -96,9 +96,9 @@ if __name__ == "__main__":
     talkdown_embeds = None
     talkup_embeds = None
 
-    if exists("talkdown_embeddings.csv"):
+    if exists("talkdown_embeddings.pkl"):
         print("loading data...")
-        talkdown_embeds = pd.read_csv("talkdown_embeddings.csv", sep="\t", header=False)
+        talkdown_embeds = pd.read_pickle("talkdown_embeddings.pkl")
     else:
         print("Calling get_sentence_embeddings for talkdown")
         talkdown_embeds = get_sentence_embeddings(condescending_set)
@@ -107,16 +107,16 @@ if __name__ == "__main__":
         #     print("\n\n")
         #     print(item)
         talkdown_embeds = pd.DataFrame(talkdown_embeds, columns =['sentence', 'embedding'])
-        talkdown_embeds.to_csv("talkdown_embeddings.csv", sep='\t')
+        talkdown_embeds.to_pickle("talkdown_embeddings.pkl")
     
-    if exists("talkup_embeddings.csv"):
+    if exists("talkup_embeddings.pkl"):
         print("loading data...")
-        talkup_embeds = pd.read_csv("talkup_embeddings.csv", sep="\t", header=False)
+        talkup_embeds = pd.read_pickle("talkup_embeddings.pkl")
     else:
         print("Calling get_sentence_embeddings for talkup")
         talkup_embeds = get_sentence_embeddings(empowering_set)
         talkup_embeds = pd.DataFrame(talkup_embeds, columns =['sentence', 'embedding'])
-        talkup_embeds.to_csv("talkup_embeddings.csv", sep='\t')
+        talkup_embeds.to_pickle("talkup_embeddings.pkl")
 
     random_test_sentences = [
         "Plants photosynthesize to produce their own energy",
@@ -150,6 +150,7 @@ if __name__ == "__main__":
         print(f"Matched with TalkUp sentence: {matched_sentence}")
         talkup_matched.append(matched_sentence)
 
+    pd.DataFrame(talkup_matched).to_csv("talkup_matched.csv")
 
     # empowering_set_abridged = read_filtered_reddit(abridged=True, k=len(condescending_set))
     # print(f"len(empowering_set): {len(empowering_set)}")
