@@ -96,9 +96,9 @@ if __name__ == "__main__":
     talkdown_embeds = None
     talkup_embeds = None
 
-    if exists("talkdown_embeddings.pkl"):
+    if exists("talkdown_embeddings.csv"):
         print("loading data...")
-        talkdown_embeds = pd.read_pickle("talkdown_embeddings.pkl")
+        talkdown_embeds = pd.read_csv("talkdown_embeddings.csv", sep="\t", header=False)
     else:
         print("Calling get_sentence_embeddings for talkdown")
         talkdown_embeds = get_sentence_embeddings(condescending_set)
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         #     print("\n\n")
         #     print(item)
         talkdown_embeds = pd.DataFrame(talkdown_embeds, columns =['sentence', 'embedding'])
-        talkdown_embeds.to_pickle("talkdown_embeddings.pkl")
+        talkdown_embeds.to_csv("talkdown_embeddings.csv", sep='\t')
     
     if exists("talkup_embeddings.csv"):
         print("loading data...")
