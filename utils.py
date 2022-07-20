@@ -219,6 +219,33 @@ def remove_outliers(data):
     print(f"trimmed_data length is {len(trimmed_data)}")
     return trimmed_data
 
+
+def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category):
+    avg_power = get_sentence_lexicon_score(sentence, power_scores)
+    avg_agency = get_sentence_lexicon_score(sentence, agency_scores)
+    avg_sentiment = get_sentence_lexicon_score(sentence, sentiment_scores)
+
+    avg_concreteness = get_sentence_lexicon_score(sentence, concreteness_scores)
+
+    anger_count, anger_binary, anger_normalized = get_LIWC_count(sentence, liwc_words_by_category, "anger")
+    social_count, social_binary, social_normalized = get_LIWC_count(sentence, liwc_words_by_category, "social")
+    relig_count, relig_binary, relig_normalized = get_LIWC_count(sentence, liwc_words_by_category, "relig")
+    sexual_count, sexual_binary, sexual_normalized = get_LIWC_count(sentence, liwc_words_by_category, "sexual")
+    humans_count, humans_binary, humans_normalized = get_LIWC_count(sentence, liwc_words_by_category, "humans")
+
+    feature_vector = [
+        avg_power, 
+        avg_agency, 
+        avg_sentiment, 
+        avg_concreteness,
+        anger_count, anger_binary, anger_normalized,
+        social_count, social_binary, social_normalized,
+        relig_count, relig_binary, relig_normalized,
+        sexual_count, sexual_binary, sexual_normalized,
+        humans_count, humans_binary, humans_normalized]
+    
+    return feature_vector
+
 def load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=False, matched=False):
     data = [] 
     filename = "data_abridged.pkl" if abridged else "data_unabridged.pkl"

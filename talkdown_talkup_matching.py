@@ -24,31 +24,6 @@ from numpy.linalg import norm
 model = SentenceTransformer('all-mpnet-base-v2')
 
 
-def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category):
-    avg_power = get_sentence_lexicon_score(sentence, power_scores)
-    avg_agency = get_sentence_lexicon_score(sentence, agency_scores)
-    avg_sentiment = get_sentence_lexicon_score(sentence, sentiment_scores)
-
-    avg_concreteness = get_sentence_lexicon_score(sentence, concreteness_scores)
-
-    anger_count, anger_binary, anger_normalized = get_LIWC_count(sentence, liwc_words_by_category, "anger")
-    social_count, social_binary, social_normalized = get_LIWC_count(sentence, liwc_words_by_category, "social")
-    relig_count, relig_binary, relig_normalized = get_LIWC_count(sentence, liwc_words_by_category, "relig")
-    sexual_count, sexual_binary, sexual_normalized = get_LIWC_count(sentence, liwc_words_by_category, "sexual")
-    humans_count, humans_binary, humans_normalized = get_LIWC_count(sentence, liwc_words_by_category, "humans")
-
-    feature_vector = [
-        avg_power, 
-        avg_agency, 
-        avg_sentiment, 
-        avg_concreteness,
-        anger_count, anger_binary, anger_normalized,
-        social_count, social_binary, social_normalized,
-        relig_count, relig_binary, relig_normalized,
-        sexual_count, sexual_binary, sexual_normalized,
-        humans_count, humans_binary, humans_normalized]
-    
-    return feature_vector
 
 def get_sentence_embeddings(sentences):
     # Sentences are encoded by calling model.encode()
@@ -191,7 +166,7 @@ if __name__ == "__main__":
 
     # data = load_or_generate_dataframe(condescending_set, empowering_set, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
     data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
-    data_matched = load_or_generate_dataframe(condescending_set, talkup_matched, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
+    data_matched = load_or_generate_dataframe(condescending_set, talkup_matched, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, matched=True)
     print("POTATO POTATO POTATO")
     print(f"len(talkup_matched): {len(talkup_matched)}")
     print(f"len(data_matched): {len(data_matched)}")
@@ -264,6 +239,6 @@ if __name__ == "__main__":
     print(f"len(empowering_set_abridged): {len(empowering_set_abridged)}")
     print(f"len(data_abridged): {len(data_abridged)}")
 
-    print(talkup_matched)
-    print("\n\n\n")
-    print(empowering_set_abridged)
+    # print(talkup_matched)
+    # print("\n\n\n")
+    # print(empowering_set_abridged)
