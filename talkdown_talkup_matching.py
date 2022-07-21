@@ -21,19 +21,14 @@ from numpy.linalg import norm
 
 # using this library: https://huggingface.co/sentence-transformers/all-mpnet-base-v2
 # errors with installing the sentence_transformers library can be solved with this solution: https://github.com/UKPLab/sentence-transformers/issues/128
-model = SentenceTransformer('all-mpnet-base-v2')
+# model = SentenceTransformer('all-mpnet-base-v2')
 
 
 
 def get_sentence_embeddings(sentences):
-    # Sentences are encoded by calling model.encode()
-    # print("calling model.encode(sentences)")
-    # embeddings = model.encode(sentences)
-    # # sentences_to_embeds = {}
-    # # for i in range(len(sentences)):
-    # #     sentences_to_embeds[sentence]
-    # print("zipping sentences and embeddings into list of tuples")
-    # return zip(sentences, embeddings)
+    # using this library for the model: https://huggingface.co/sentence-transformers/all-mpnet-base-v2
+    # errors with installing the sentence_transformers library can be solved with this solution: https://github.com/UKPLab/sentence-transformers/issues/128
+    model = SentenceTransformer('all-mpnet-base-v2')
     sentence_embeddings = []
     for sentence in sentences:
         print("Calling model.encode on one sentence")
@@ -62,14 +57,7 @@ def get_most_similar_sentence(s1, embed1, sentence_embeddings):
     # print(f"Sentence 2: {matched_sentence}")
     return matched_sentence
 
-
-if __name__ == "__main__":
-
-    ### Read TalkDown data as condescending set
-    condescending_set = read_talkdown()
-    print(f"len(condescending_set): {len(condescending_set)}")
-    ### Read filtered Reddit scrape as empowering set
-    empowering_set = read_filtered_reddit()
+def get_talkup_matched_samples(condescending_set, empowering_set):
     talkdown_embeds = None
     talkup_embeds = None
 
@@ -95,38 +83,6 @@ if __name__ == "__main__":
         talkup_embeds = pd.DataFrame(talkup_embeds, columns =['sentence', 'embedding'])
         talkup_embeds.to_pickle("talkup_embeddings.pkl")
 
-    # random_test_sentences = [
-    #     "Plants photosynthesize to produce their own energy",
-    #     "That's a dumb reason to vote for anyone, regardless of what you think of immigration",
-    #     "I like cats",
-    #     "I like dogs",
-    #     "The mitochondria is the powerhouse of the cell",
-    #     "What the fuck",
-    #     "I don't see why you would think that",
-    #     "I can't understand why you think that way",
-    #     "What are all these Mexicans doing here? It's America. I'm voting for Trump because he'll build a wall."
-    # ]
-    # test_embeds = get_sentence_embeddings(random_test_sentences)
-    # for item in test_embeds:
-    #     # print(item)
-    #     print("LIST ELEMENT IS OF TYPE:")
-    #     print(type(item))
-    #     print(len(item))
-    #     print(type(item[0]))
-    #     print(type(item[1]))
-
-    # get_most_similar_sentence(test_embeds[0][0], test_embeds[0][1], test_embeds)
-
-    # for index, row in talkup_embeds.iterrows():
-    #     print(f"type: {type(item)}, length: {len(item)}, item: {row}")
-    #     print(f"row['sentence']: {row['sentence']}")
-    #     print(f"row['embedding']: {row['embedding']}")
-    # for index, row in talkdown_embeds.iterrows()[:10]:
-    #     print(f"type: {type(item)}, length: {len(item)}, item: {item}")
-    #     print(f"row['sentence']: {row['sentence']}")
-    #     print(f"row['embedding']: {row['embedding']}")
-   
-
     talkup_matched = []
    
     if exists("talkup_matched.csv"):
@@ -144,6 +100,18 @@ if __name__ == "__main__":
             talkup_matched.append(matched_sentence)
 
         pd.DataFrame(talkup_matched).to_csv("talkup_matched.csv")
+    
+    return talkup_matched
+
+if __name__ == "__main__":
+
+    ### Read TalkDown data as condescending set
+    condescending_set = read_talkdown()
+    print(f"len(condescending_set): {len(condescending_set)}")
+    ### Read filtered Reddit scrape as empowering set
+    empowering_set = read_filtered_reddit()
+
+    talkup_matched = get_talkup_matched_samples(condescending_set, empowering_set)
 
     empowering_set_abridged = read_filtered_reddit(abridged=True, k=len(condescending_set))
     # print(f"len(empowering_set): {len(empowering_set)}")

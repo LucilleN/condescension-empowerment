@@ -1,7 +1,7 @@
 from psaw import PushshiftAPI
 import pandas as pd
 import datetime as dt
-
+import numpy as np
 
 api = PushshiftAPI()
 
@@ -18,11 +18,19 @@ subreddits = [
     "YouShouldKnow"
 ]
 
+data_fields = [
+    'title', 
+    'score', 
+    'upvote_ratio', 
+    'all_awardings'
+]
+
 if __name__ == "__main__":
 
     for subreddit in subreddits:
 
         for year in range(2005, 2022): # everything from Jan 1, 2005 (inclusive) to Jan 1, 2022 (exclusive)
+        # for year in range(2020, 2022): # everything from Jan 1, 2005 (inclusive) to Jan 1, 2022 (exclusive)
 
             for month in range(1, 13): # every month from January (month 1) to December (month 12)
 
@@ -49,10 +57,27 @@ if __name__ == "__main__":
 
                 print(f"\n########## {subreddit} {month}-{year} submissions shape: {submissions.shape}\n")
                 # print(DecidingToBeBetter_submissions[['title', 'score']].sample(10))
-                data_to_keep = submissions[['title', 'score']]
-                print(f"data_to_keep shape: {data_to_keep.shape}")
+                # data_to_keep = submissions[['title', 'score']]
+                
+                for column_name in data_fields:
+                    if column_name not in submissions: 
+                        submissions[column_name] = np.nan
 
-                data_to_keep.to_csv(f"data/reddit_scrape/{subreddit}.csv", mode='a', sep="\t", index=False)
+                data_to_keep = submissions[['title', 'score', 'upvote_ratio', 'all_awardings']]
+                # print(data_to_keep['author_flair_css_class'])
+                # print(data_to_keep['author_flair_text'])
+                # print(data_to_keep['score'])
+                # print(data_to_keep['link_flair_text'])
+                # print(data_to_keep['all_awardings'])
+                # for item in data_to_keep["all_awardings"]:
+                #     if len(item) > 0:
+                #         print(item)
+                
+                print(f"data_to_keep shape: {data_to_keep.shape}")
+                for col in data_to_keep.columns:
+                    print(col)
+
+                data_to_keep.to_csv(f"data/reddit_scrape_2/{subreddit}.csv", mode='a', sep="\t", index=False)
 
 
 

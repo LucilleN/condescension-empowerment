@@ -36,16 +36,25 @@ def read_filtered_reddit(abridged=False, k=2602):
     df = pd.read_csv("data/reddit_scrape_filtered.csv", sep="\t", header=None)
     empowering_set = df.values.reshape(-1).tolist() # reshape flattens it because every string is in its own list, making a big list of lists
 
-    if abridged:
-        # using power as a rough estimator of empowerment / condescension so that we can take only the top 2k
-        empowering_set_with_power = get_sentences_with_power_scores(empowering_set)
-        emp_sorted_by_power = sorted(empowering_set_with_power, key=lambda x: x['power'], reverse=True) 
-        # Trim to length k
-        emp_sorted_by_power_trimmed = emp_sorted_by_power[:k]
-        sentences_only = [item['sentence'] for item in emp_sorted_by_power_trimmed]
-        return sentences_only
+    # if abridged:
+    #     # using power as a rough estimator of empowerment / condescension so that we can take only the top 2k
+    #     empowering_set_with_power = get_sentences_with_power_scores(empowering_set)
+    #     emp_sorted_by_power = sorted(empowering_set_with_power, key=lambda x: x['power'], reverse=True) 
+    #     # Trim to length k
+    #     emp_sorted_by_power_trimmed = emp_sorted_by_power[:k]
+    #     sentences_only = [item['sentence'] for item in emp_sorted_by_power_trimmed]
+    #     return sentences_only
     
     return empowering_set
+
+def get_talkup_highest_power(full_empowering_set, k):
+    # using power as a rough estimator of empowerment / condescension so that we can take only the top 2k
+    empowering_set_with_power = get_sentences_with_power_scores(full_empowering_set)
+    emp_sorted_by_power = sorted(empowering_set_with_power, key=lambda x: x['power'], reverse=True) 
+    # Trim to length k
+    emp_sorted_by_power_trimmed = emp_sorted_by_power[:k]
+    sentences_only = [item['sentence'] for item in emp_sorted_by_power_trimmed]
+    return sentences_only
 
 def read_veiled_toxicity_clean():
     """
@@ -314,3 +323,82 @@ def plot_data(plot_type, data, fig_title, subplot_names=None, num_rows=4, num_co
     fig.suptitle(fig_title)
 
     plt.show()
+
+
+def get_sentence_embeddings(sentences):
+    # using this library for the model: https://huggingface.co/sentence-transformers/all-mpnet-base-v2
+    # errors with installing the sentence_transformers library can be solved with this solution: https://github.com/UKPLab/sentence-transformers/issues/128
+    model = SentenceTransformer('all-mpnet-base-v2')
+    sentence_embeddings = []
+    for sentence in sentences:
+        print("Calling model.encode on one sentence")
+        embedding = model.encode(sentence)
+        sentence_embeddings.append((sentence, embedding))
+    return sentence_embeddings
+
+def cosine_similarity(vector1, vector2):
+    return dot(vector1, vector2) / (norm(vector1) * norm(vector2))
+
+def get_most_similar_sentence(s1, embed1, sentence_embeddings):
+    highest_similarity = 0
+    matched_sentence = None
+    for index, row in sentence_embeddings.iterrows():
+        s2 = row['sentence']
+        embed2 = row['embedding']
+        similarity = cosine_similarity(embed1, embed2)
+        # print(f"found cosine similarity of {similarity}")
+        if similarity > highest_similarity:
+            highest_similarity = similarity
+            print(f"Highest similarity is now {highest_similarity}")
+            matched_sentence = s2
+    
+    # print(f"Sentence 1: {s1}")
+    # print(f"MATCHED WITH")
+    # print(f"Sentence 2: {matched_sentence}")
+    return matched_sentence
+
+def get_talkup_matched_samples(condescending_set, empowering_set):
+    talkdown_embeds = None
+    talkup_embeds = None
+
+    if exists("talkdown_embeddings.pkl"):
+        print("loading data...")
+        talkdown_embeds = pd.read_pickle("talkdown_embeddings.pkl")
+    else:
+        print("Calling get_sentence_embeddings for talkdown")
+        talkdown_embeds = get_sentence_embeddings(condescending_set)
+        # print("TALKDOWN EMBEDS")
+        # for item in talkdown_embeds:
+        #     print("\n\n")
+        #     print(item)
+        talkdown_embeds = pd.DataFrame(talkdown_embeds, columns =['sentence', 'embedding'])
+        talkdown_embeds.to_pickle("talkdown_embeddings.pkl")
+    
+    if exists("talkup_embeddings.pkl"):
+        print("loading data...")
+        talkup_embeds = pd.read_pickle("talkup_embeddings.pkl")
+    else:
+        print("Calling get_sentence_embeddings for talkup")
+        talkup_embeds = get_sentence_embeddings(empowering_set)
+        talkup_embeds = pd.DataFrame(talkup_embeds, columns =['sentence', 'embedding'])
+        talkup_embeds.to_pickle("talkup_embeddings.pkl")
+
+    talkup_matched = []
+   
+    if exists("talkup_matched.csv"):
+        df = pd.read_csv("talkup_matched.csv")
+        talkup_matched = df.values.reshape(-1).tolist()
+    else:
+        for index, row in talkdown_embeds.iterrows():
+            # print(tup)
+            s1 = row['sentence']
+            embed1 = row['embedding']
+            print(f"TalkDown sentence: {s1}") #, \nembedding: {embed1}")
+            matched_sentence = get_most_similar_sentence(s1, embed1, talkup_embeds)
+            # print(f"\nTalkDown sentence: {s1}")
+            print(f"Matched with TalkUp sentence: {matched_sentence}")
+            talkup_matched.append(matched_sentence)
+
+        pd.DataFrame(talkup_matched).to_csv("talkup_matched.csv")
+    
+    return talkup_matched

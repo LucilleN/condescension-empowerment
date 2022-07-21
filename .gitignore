@@ -135,6 +135,7 @@ dmypy.json
 
 # Ignore outputs I'm saving just for reference
 /outputs
+*.pkl
 
 # Miscellaneous 
 .DS_Store
