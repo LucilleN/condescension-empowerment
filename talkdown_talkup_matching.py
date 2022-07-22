@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     ### Read TalkDown data as condescending set
     condescending_set = read_talkdown()
-    print(f"len(condescending_set): {len(condescending_set)}")
+    # print(f"len(condescending_set): {len(condescending_set)}")
     ### Read filtered Reddit scrape as empowering set
     empowering_set = read_filtered_reddit()
 

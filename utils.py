@@ -9,6 +9,7 @@ from scipy import stats
 import matplotlib.pyplot as plt
 import math
 import seaborn as sns
+import random
 
 
 def read_talkdown():
@@ -402,3 +403,6 @@ def get_talkup_matched_samples(condescending_set, empowering_set):
         pd.DataFrame(talkup_matched).to_csv("talkup_matched.csv")
     
     return talkup_matched
+
+def get_talkup_random(empowering_set, k):
+    return random.sample(empowering_set, k)

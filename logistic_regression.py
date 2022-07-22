@@ -12,7 +12,9 @@ from utils import (
     print_model_summaries,
     remove_outliers,
     plot_data,
-    get_talkup_matched_samples)
+    get_talkup_matched_samples,
+    get_talkup_highest_power,
+    get_talkup_random)
 import statsmodels.formula.api as smf
 import statsmodels.stats.weightstats as stattests
 import pandas as pd
@@ -47,13 +49,20 @@ def get_feature_vector(sentence, power_scores, agency_scores, sentiment_scores, 
 if __name__ == "__main__":
 
     ### Read TalkDown data as condescending set
-    condescending_set = read_talkdown()
-    print(f"len(condescending_set): {len(condescending_set)}")
+    talkdown = read_talkdown()
+    print(f"len(talkdown): {len(talkdown)}")
     ### Read filtered Reddit scrape as empowering set
-    empowering_set_full = read_filtered_reddit()
-    empowering_set_abridged = read_filtered_reddit(abridged=True, k=len(condescending_set))
-    print(f"len(empowering_set_full): {len(empowering_set_full)}")
-    print(f"len(empowering_set_abridged): {len(empowering_set_abridged)}")
+    talkup_full = read_filtered_reddit()
+    print(f"len(talkup_full): {len(talkup_full)}")
+
+    talkup_highest_power = get_talkup_highest_power(talkup_full, len(talkdown))
+    print(f"len(talkup_highest_power): {len(talkup_highest_power)}")
+
+    talkup_matched = get_talkup_matched_samples(talkdown, talkup_full)
+    print(f"len(talkup_matched): {len(talkup_matched)}")
+
+    talkup_random = get_talkup_random(talkup_full, len(talkdown))
+    print(f"len(talkup_random): {len(talkup_random)}")
 
     ### Load VAD lexicon
     sentiment_scores = read_VAD_scores("v") # v for valence
@@ -66,12 +75,12 @@ if __name__ == "__main__":
     ### Load LIWC
     liwc_words_by_category = read_LIWC_lexicon()
 
-    ### Feature extraction
-    X = [] # a list of lists, where rows are samples and columns are features
-    y = [] # a list of 0's and 1's corresponding to the label of each sample. 0 = condescension, 1 = empowerment
+    # ### Feature extraction
+    # X = [] # a list of lists, where rows are samples and columns are features
+    # y = [] # a list of 0's and 1's corresponding to the label of each sample. 0 = condescension, 1 = empowerment
 
-    data = load_or_generate_dataframe(condescending_set, empowering_set_full, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
-    data_abridged = load_or_generate_dataframe(condescending_set, empowering_set_abridged, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
+    data = load_or_generate_dataframe(talkdown, talkup_full, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
+    data_abridged = load_or_generate_dataframe(talkdown, talkup_highest_power, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
 
     # save_descriptive_stats(data, 'descriptive_stats/unabridged.csv')
     # save_descriptive_stats(data_abridged, 'descriptive_stats/abridged.csv')
@@ -121,20 +130,24 @@ if __name__ == "__main__":
     # lr_model_4 = smf.logit("is_empowering ~ power * agency * sentiment * concreteness", data=data).fit()
     # models['VAD, CONCRETENESS, WITH INTERACTIONS, FULL DATA'] = lr_model_4
 
-    # Adding LIWC features
-    lr_model_5 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
-    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_5
+    # # Adding LIWC features
+    # lr_model_5 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data).fit()
+    # models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, FULL DATA'] = lr_model_5
+
+    # Best performing model so far -- now we want to try different ways of trimming the empowering set to 2600 examples
+    data_highest_power = load_or_generate_dataframe(talkdown, talkup_highest_power, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, abridged=True)
     lr_model_6 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_abridged).fit()
-    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, ABRIDGED DATA'] = lr_model_6
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, HIGHEST POWER DATA'] = lr_model_6
 
     # Trying with embedding-matched data
-    talkup_matched = get_talkup_matched_samples(condescending_set, empowering_set_full)
-    data_matched = load_or_generate_dataframe(condescending_set, talkup_matched, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, matched=True)
+    data_matched = load_or_generate_dataframe(talkdown, talkup_matched, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, matched=True)
     lr_model_7 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_matched).fit()
     models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, EMBEDDING-MATCHED DATA'] = lr_model_7
 
     # Trying with randomly sampled data
-    # talkup_random = df.sample
+    data_random = load_or_generate_dataframe(talkdown, talkup_random, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, matched=True)
+    lr_model_8 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_random).fit()
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, RANDOM DATA'] = lr_model_8
 
     # Trying with posts with highest score
 
