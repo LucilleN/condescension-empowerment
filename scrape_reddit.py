@@ -59,9 +59,14 @@ if __name__ == "__main__":
                 # print(DecidingToBeBetter_submissions[['title', 'score']].sample(10))
                 # data_to_keep = submissions[['title', 'score']]
                 
-                for column_name in data_fields:
-                    if column_name not in submissions: 
-                        submissions[column_name] = np.nan
+                # for column_name in data_fields:
+                #     if column_name not in submissions: 
+                #         submissions[column_name] = np.nan
+
+                if 'upvote_ratio' not in submissions:
+                    submissions['upvote_ratio'] = -1
+                if 'all_awardings' not in submissions:
+                    submissions['all_awardings'] = np.empty((len(submissions), 0)).tolist()
 
                 data_to_keep = submissions[['title', 'score', 'upvote_ratio', 'all_awardings']]
                 # print(data_to_keep['author_flair_css_class'])
@@ -77,7 +82,7 @@ if __name__ == "__main__":
                 for col in data_to_keep.columns:
                     print(col)
 
-                data_to_keep.to_csv(f"data/reddit_scrape_2/{subreddit}.csv", mode='a', sep="\t", index=False)
+                data_to_keep.to_csv(f"data/reddit_scrape_2/{subreddit}.csv", mode='a', sep="\t", header=False, index=False)
 
 
 
