@@ -28,25 +28,33 @@ def read_talkdown():
             # condescending_set.append(data['post']) # This is the entire post, which contains quotedpost plus more context
     return condescending_set
 
-def read_filtered_reddit(abridged=False, k=2602):
+def read_filtered_reddit():
     """
     Reads the filtered data scraped from 8 empowering subreddits. 
     Returns:
         A list of strings, where each string is a post title
     """
     df = pd.read_csv("data/reddit_scrape_filtered.csv", sep="\t", header=None)
-    empowering_set = df.values.reshape(-1).tolist() # reshape flattens it because every string is in its own list, making a big list of lists
-
-    # if abridged:
-    #     # using power as a rough estimator of empowerment / condescension so that we can take only the top 2k
-    #     empowering_set_with_power = get_sentences_with_power_scores(empowering_set)
-    #     emp_sorted_by_power = sorted(empowering_set_with_power, key=lambda x: x['power'], reverse=True) 
-    #     # Trim to length k
-    #     emp_sorted_by_power_trimmed = emp_sorted_by_power[:k]
-    #     sentences_only = [item['sentence'] for item in emp_sorted_by_power_trimmed]
-    #     return sentences_only
-    
+    empowering_set = df.values.reshape(-1).tolist() # reshape flattens it because every string is in its own list, making a big list of lists    
     return empowering_set
+
+def read_filtered_reddit_with_metadata():
+    """
+    Reads the filtered data scraped from 8 empowering subreddits. 
+    Returns:
+        A dataframe
+    """
+    df = pd.read_csv("data/reddit_scrape_filtered.csv", sep="\t", header=None, names=["sentence", "score"])
+    # empowering_set = df.values.reshape(-1).tolist() # reshape flattens it because every string is in its own list, making a big list of lists    
+    return df
+
+def get_talkup_highest_scores(full_empowering_set_with_metadata, k):
+    sorted = full_empowering_set_with_metadata.sort_values('score')
+    trimmed = sorted.head(k)
+    print("SENTENCES WITH HIGHEST SCORES")
+    print(trimmed)
+    sentences_only = trimmed['sentence'].tolist()
+    return sentences_only
 
 def get_talkup_highest_power(full_empowering_set, k):
     # using power as a rough estimator of empowerment / condescension so that we can take only the top 2k

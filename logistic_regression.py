@@ -2,6 +2,7 @@
 from utils import (
     read_talkdown, 
     read_filtered_reddit, 
+    read_filtered_reddit_with_metadata,
     read_VAD_scores, 
     read_concreteness, 
     get_sentence_lexicon_score, 
@@ -14,7 +15,8 @@ from utils import (
     plot_data,
     get_talkup_matched_samples,
     get_talkup_highest_power,
-    get_talkup_random)
+    get_talkup_random,
+    get_talkup_highest_scores)
 import statsmodels.formula.api as smf
 import statsmodels.stats.weightstats as stattests
 import pandas as pd
@@ -63,6 +65,9 @@ if __name__ == "__main__":
 
     talkup_random = get_talkup_random(talkup_full, len(talkdown))
     print(f"len(talkup_random): {len(talkup_random)}")
+
+    talkup_full_with_metadata = read_filtered_reddit_with_metadata()
+    talkup_highest_scores = get_talkup_highest_scores(talkup_full_with_metadata, len(talkdown))
 
     ### Load VAD lexicon
     sentiment_scores = read_VAD_scores("v") # v for valence
@@ -145,11 +150,14 @@ if __name__ == "__main__":
     models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, EMBEDDING-MATCHED DATA'] = lr_model_7
 
     # Trying with randomly sampled data
-    data_random = load_or_generate_dataframe(talkdown, talkup_random, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category, matched=True)
+    data_random = load_or_generate_dataframe(talkdown, talkup_random, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
     lr_model_8 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_random).fit()
     models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, RANDOM DATA'] = lr_model_8
 
     # Trying with posts with highest score
+    data_highest_score = load_or_generate_dataframe(talkdown, talkup_highest_scores, power_scores, agency_scores, sentiment_scores, concreteness_scores, liwc_words_by_category)
+    lr_model_9 = smf.logit("is_empowering ~ power + agency + sentiment + concreteness + anger_count + social_count + relig_count + sexual_count + humans_count", data=data_highest_score).fit()
+    models['VAD, CONCRETENESS, AND LIWC COUNTS, NO INTERACTIONS, HIGHEST SCORE DATA'] = lr_model_9
 
     # Trying with post with most awards
     
