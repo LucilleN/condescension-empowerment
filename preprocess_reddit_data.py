@@ -4,14 +4,15 @@ import statistics
 from utils import read_talkdown
 
 
-all_data = []
+dfs_for_each_subreddit = []
 for subreddit in subreddits:
     df = pd.read_csv(f"data/reddit_scrape/{subreddit}.csv", sep='\t')
-    post_titles = list(df["title"])
-    print(f"{subreddit} has {len(post_titles)} posts")
-    all_data.extend(post_titles)
+    # post_titles = list(df["title"])
+    print(f"{subreddit} has {len(df)} posts")
+    dfs_for_each_subreddit.append(df)
     # post_titles = list(post_titles)
     # print(post_titles[:10])
+all_data = pd.concat(dfs_for_each_subreddit)
 print(f"In total there are {len(all_data)} posts")
 
 
@@ -48,7 +49,9 @@ def contains_2nd_person_pronouns(tokens):
 # print(all_data.to_string())
 
 filtered_data = []
-for sentence in all_data:
+for index, row in all_data.iterrows():
+    sentence = row[0]
+    score = row[1]
     print("iterating through all_data")
     print(f"printing sentence: {sentence}")
 
@@ -68,10 +71,10 @@ for sentence in all_data:
     if not contains_2nd_person_pronouns(tokens):
         continue
     
-    filtered_data.append(sentence)
+    filtered_data.append((sentence, score))
 
 print(f"After filtering there are {len(filtered_data)} posts")
 # After filtering there are 208000 posts
 
-df = pd.DataFrame(filtered_data)
-df.to_csv("data/reddit_scrape_filtered.csv", sep="\t", index=False, header=False)
+df = pd.DataFrame(filtered_data, columns=["sentence", "score"])
+df.to_csv("data/reddit_scrape_filtered_with_metadata.csv", sep="\t", index=False, header=False)
